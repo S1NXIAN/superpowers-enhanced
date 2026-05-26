@@ -134,21 +134,7 @@ If you catch yourself thinking any of these, stop what you're doing:
 
 ## Enhanced Protocols
 
-### 8. Mandatory Security Triage
-
-**BEFORE ANY WORK BEGINS**, check every file to be created or modified against the hard-coded
-security triggers in the `security-triage` skill. This is NOT a judgment call — it is pattern
-matching.
-
-- If any file path matches T1 patterns (auth*, *secret*, *token*, *crypto*, etc.) → **full security audit required**
-- If any code content matches T2 patterns (import *auth*, def authenticate*, SECRET_KEY, etc.) → **full security audit required**
-- If the file lives in a T3 directory (auth/, security/, crypto/, etc.) → **full security audit required**
-- If a trigger fires → halt, annotate with `[SECURITY-TRIAGE: <trigger> <pattern>]`, run the full checklist, escalate production findings
-
-**The agent does not decide whether something is security-related. The patterns decide.**
-The `security-triage` skill codifies all triggers — invoke it.
-
-### 9. ASI Loop — Batch Fix Isolation
+### 8. ASI Loop — Batch Fix Isolation
 
 When multiple issues are detected in overlapping code:
 
@@ -159,7 +145,7 @@ When multiple issues are detected in overlapping code:
 - Never fix multiple issues in the same pass.
 - The `asi-loop` skill codifies this protocol — invoke it.
 
-### 10. Deliberation Gate — Multi-Perspective Architecture Audit
+### 9. Deliberation Gate — Multi-Perspective Architecture Audit
 
 Before drafting architecture for any **tier-3 task** (4+ files, new subsystem,
 cross-cutting concerns), spawn three stakeholder roles for critique:
@@ -174,7 +160,7 @@ Each gets exactly **one un-debated response**. Synthesize their findings into a
 revised architecture before presenting the design.
 The `deliberation-gate` skill codifies this protocol — invoke it.
 
-### 11. Ephemeral State Hashing — Anti-TOCTOU Protection
+### 10. Ephemeral State Hashing — Anti-TOCTOU Protection
 
 When working with security-critical code or automated scanners:
 
@@ -186,7 +172,7 @@ When working with security-critical code or automated scanners:
 - This prevents Time-of-Check to Time-of-Use exploits where a compromised
   agent passes a scan then swaps the payload before execution.
 
-### 12. Social Accountability Framing
+### 11. Social Accountability Framing
 
 When dispatching sub-agents for implementation or review, inject
 consequence-aware framing into their prompts:

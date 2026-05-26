@@ -91,8 +91,8 @@ hash_file() {
 
 hash_path() {
   # Convert absolute file path to a safe hash store path
-  # /home/xian/project/src/file.py → home_xian_project_src_file_py.sha256
-  echo "$1" | sed 's|^/||; s|/|_|g'
+  # /home/xian/my_project/src/file.py → home%2Fxian%2Fmy_project%2Fsrc%2Ffile.py
+  echo "$1" | sed 's|^/||; s|/|%2F|g'
 }
 
 ensure_store() {
@@ -125,14 +125,14 @@ cmd_verify() {
 
   if [[ ! -f "$file" ]]; then
     error "File not found: $file"
-    exit 3
+    return 3
   fi
 
   local store_path="${HASH_STORE_DIR}/$(hash_path "$file")"
 
   if [[ ! -f "$store_path" ]]; then
     warn "No stored hash for ${file} — run 'verify-hash.sh store ${file}' first"
-    exit 2
+    return 2
   fi
 
   local stored_hash
@@ -142,13 +142,13 @@ cmd_verify() {
 
   if [[ "$stored_hash" == "$current_hash" ]]; then
     ok "Integrity verified: ${file}"
-    exit 0
+    return 0
   else
     error "INTEGRITY FAILURE: ${file}"
     error "  Stored hash:   ${stored_hash}"
     error "  Current hash:  ${current_hash}"
     error "  File was modified between check and use — possible TOCTOU exploit."
-    exit 1
+    return 1
   fi
 }
 
@@ -169,19 +169,19 @@ cmd_check() {
 
     # Reverse the hash path back to a real path
     local real_path
-    real_path="/$(echo "$store_name" | sed 's|_|/|g' | sed 's|\.sha256$||')"
+    real_path="/$(echo "$store_name" | sed 's|%2F|/|g')"
 
     if [[ ! -f "$real_path" ]]; then
       warn "Tracked file no longer exists: ${real_path}"
       continue
     fi
 
-    ((count++))
+    count=$((count + 1))
     if cmd_verify "$real_path" &>/dev/null; then
       : # already reported by cmd_verify
     else
       all_pass=false
-      ((fail_count++))
+      fail_count=$((fail_count + 1))
       cmd_verify "$real_path" || true
     fi
   done
@@ -217,7 +217,7 @@ cmd_status() {
     local store_name
     store_name="$(basename "$store_file")"
     local real_path
-    real_path="/$(echo "$store_name" | sed 's|_|/|g' | sed 's|\.sha256$||')"
+    real_path="/$(echo "$store_name" | sed 's|%2F|/|g')"
 
     if [[ ! -f "$real_path" ]]; then
       echo -e "  ${YELLOW}MISSING${NC}  ${real_path}"
@@ -250,6 +250,7 @@ case "$COMMAND" in
   verify)
     [[ -n "${2:-}" ]] || { error "Usage: verify-hash.sh verify <file>"; exit 4; }
     cmd_verify "$2"
+    exit $?
     ;;
   check)
     cmd_check

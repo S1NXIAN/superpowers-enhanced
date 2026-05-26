@@ -354,10 +354,7 @@ superpowers-opencode/
 │   └── code-quality-reviewer.md  # Enhanced code reviewer prompt
 ├── scripts/
 │   └── verify-hash.sh     # Ephemeral State Hashing (anti-TOCTOU)
-└── docs/
-    └── superpowers/
-        ├── specs/
-        └── plans/
+└── skills-lock.json       # Skill integrity hashes
 ```
 
 ## License

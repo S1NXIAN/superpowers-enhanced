@@ -103,6 +103,7 @@ function readChar() {
       stdin.once('data', (buf) => {
         stdin.setRawMode(false);
         stdin.pause();
+        console.log('');
         const char = buf.toString().trim().toLowerCase();
         resolve(char !== 'n' && char !== 'no');
       });
@@ -289,11 +290,14 @@ function revertConfig(configChanges) {
         break;
       case 'skills.paths':
         if (change.after === undefined) {
-          delete config.skills.paths;
-          if (Object.keys(config.skills).length === 0) {
-            delete config.skills;
+          if (config.skills) {
+            delete config.skills.paths;
+            if (Object.keys(config.skills).length === 0) {
+              delete config.skills;
+            }
           }
         } else {
+          if (!config.skills) config.skills = {};
           config.skills.paths = change.after;
         }
         break;
@@ -344,7 +348,11 @@ function restoreFromBackup(restores) {
   const config = readJson(CONFIG_JSON_PATH);
 
   for (const r of restores) {
-    if (r.type === 'config_field' && r.field === 'default_agent' && config) {
+    if (r.type === 'config_field' && r.field === 'default_agent') {
+      if (!config) {
+        outWarn(`Cannot restore ${r.field} — opencode.json not readable`);
+        continue;
+      }
       config.default_agent = r.value;
       writeJson(CONFIG_JSON_PATH, config);
       outOk(`Restored default_agent to '${r.value}'`);

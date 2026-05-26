@@ -188,9 +188,11 @@ function preflight() {
   outHeader('Prerequisites');
 
   if (!existsSync(CONFIG_JSON_PATH)) {
-    outError(`OpenCode config not found at ${CONFIG_JSON_PATH}`);
-    outError('Make sure OpenCode is installed and has been started at least once.');
-    preflightFailed = true;
+    outWarn(`OpenCode config not found at ${CONFIG_JSON_PATH}`);
+    outInfo('Creating config directory and default opencode.json...');
+    mkdirSync(CONFIG_DIR, { recursive: true });
+    writeJson(CONFIG_JSON_PATH, {});
+    outOk(`Created ${CONFIG_JSON_PATH}`);
   } else {
     outOk('OpenCode config found at ' + CONFIG_DIR);
   }
@@ -239,7 +241,7 @@ function planJsonMerge(existingConfig) {
 
   const skillsPaths = existingConfig.skills?.paths || [];
   if (!skillsPaths.includes(SKILLS_PATH)) {
-    const beforePaths = existingConfig.skills ? [...existingConfig.skills.paths] : [];
+    const beforePaths = existingConfig.skills?.paths ? [...existingConfig.skills.paths] : [];
     const afterPaths = [...skillsPaths, SKILLS_PATH];
     changes.push({ field: 'skills.paths', before: beforePaths, after: afterPaths });
   }
@@ -341,6 +343,7 @@ async function confirm() {
       stdin.once('data', (buf) => {
         stdin.setRawMode(false);
         stdin.pause();
+        console.log('');
         const char = buf.toString().trim().toLowerCase();
         resolve(char !== 'n' && char !== 'no');
       });
