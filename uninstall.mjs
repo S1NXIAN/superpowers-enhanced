@@ -40,7 +40,7 @@ let forceMode = false;
 let dryRunMode = false;
 
 function showHelp() {
-  console.log(`${c(BOLD, 'Superpowers + OpenCode \u2014 config uninstaller')}\n`);
+  console.log(`${c(BOLD, 'Superpowers Enhanced \u2014 config uninstaller')}\n`);
   console.log(`${c(DIM, 'Reverses the changes made by setup.mjs and restores files from backup.')}\n`);
   console.log(`${c(BOLD, 'Usage:')}  node uninstall.mjs [OPTIONS]\n`);
   console.log(`${c(BOLD, 'Options:')}`);
@@ -469,7 +469,7 @@ async function main() {
   parseArgs();
 
   console.log('');
-  outHeader('Superpowers + OpenCode \u2014 config uninstaller');
+  outHeader('Superpowers Enhanced \u2014 config uninstaller');
   outSubdued(`Repo: ${REPO_DIR}`);
   outSubdued(`Config: ${CONFIG_DIR}\n`);
 

@@ -1,0 +1,276 @@
+#!/usr/bin/env bash
+# ===========================================================================
+# Superpowers Enhanced — one-liner installer
+#
+# Usage:
+#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/install.sh)
+#
+# What it does:
+#   1. Detects OS and installs Node.js if missing
+#   2. Downloads the repo as a tarball (no git required)
+#   3. Runs setup.mjs --force
+#   4. Cleans up the temp directory
+#
+# Supports: Linux (apt, dnf, yum, pacman, zypper, apk), macOS (brew),
+#           Windows (Git Bash / MSYS2 / WSL). Falls back to downloading
+#           Node.js directly from nodejs.org on any platform.
+# ===========================================================================
+
+set -euo pipefail
+
+REPO="S1NXIAN/superpowers-enhanced"
+BRANCH="main"
+TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
+NODE_VERSION_FALLBACK="v22.16.0"
+
+# ---------------------------------------------------------------------------
+# Terminal styling
+# ---------------------------------------------------------------------------
+if [[ -t 1 ]]; then
+  BOLD='\033[1m'; DIM='\033[2m'; RED='\033[0;31m'
+  GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'
+  NC='\033[0m'
+else
+  BOLD=''; DIM=''; RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''
+fi
+
+info()  { echo -e "  ${BLUE}•${NC} $1"; }
+ok()    { echo -e "  ${GREEN}✓${NC} $1"; }
+warn()  { echo -e "  ${YELLOW}⚠${NC} $1"; }
+fail()  { echo -e "  ${RED}✗${NC} $1"; }
+header(){ echo -e "\n${BOLD}$1${NC}"; }
+
+# ---------------------------------------------------------------------------
+# Cleanup on exit
+# ---------------------------------------------------------------------------
+TMPDIR=""
+cleanup() {
+  if [[ -n "$TMPDIR" && -d "$TMPDIR" ]]; then
+    rm -rf "$TMPDIR"
+  fi
+}
+trap cleanup EXIT
+
+# ---------------------------------------------------------------------------
+# OS detection
+# ---------------------------------------------------------------------------
+detect_os() {
+  local uname_s
+  uname_s="$(uname -s 2>/dev/null || echo "Unknown")"
+  case "$uname_s" in
+    Linux*)   echo "linux" ;;
+    Darwin*)  echo "macos" ;;
+    MINGW*|MSYS*|CYGWIN*)  echo "windows" ;;
+    *)        echo "unknown" ;;
+  esac
+}
+
+detect_arch() {
+  local uname_m
+  uname_m="$(uname -m 2>/dev/null || echo "x86_64")"
+  case "$uname_m" in
+    x86_64|amd64)    echo "x64" ;;
+    aarch64|arm64)   echo "arm64" ;;
+    armv7l|armv6l)   echo "armv7l" ;;
+    *)               echo "x64" ;;
+  esac
+}
+
+OS="$(detect_os)"
+ARCH="$(detect_arch)"
+
+# ---------------------------------------------------------------------------
+# Download helper (curl or wget)
+# ---------------------------------------------------------------------------
+setup_downloader() {
+  if command -v curl &>/dev/null; then
+    DOWNLOAD="curl"
+  elif command -v wget &>/dev/null; then
+    DOWNLOAD="wget"
+  else
+    fail "curl or wget is required but neither was found."
+    exit 1
+  fi
+}
+
+download_file() {
+  local url="$1" dest="$2"
+  if [[ "$DOWNLOAD" == "curl" ]]; then
+    curl -fsSL "$url" -o "$dest"
+  else
+    wget -q "$url" -O "$dest"
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Node.js installation
+# ---------------------------------------------------------------------------
+install_node_via_pkg_manager() {
+  case "$OS" in
+    linux)
+      if command -v apt-get &>/dev/null; then
+        ok "Found apt"
+        info "Installing Node.js via apt..."
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq nodejs npm
+      elif command -v dnf &>/dev/null; then
+        ok "Found dnf"
+        info "Installing Node.js via dnf..."
+        sudo dnf install -y nodejs npm
+      elif command -v yum &>/dev/null; then
+        ok "Found yum"
+        info "Installing Node.js via yum..."
+        sudo yum install -y nodejs npm
+      elif command -v pacman &>/dev/null; then
+        ok "Found pacman"
+        info "Installing Node.js via pacman..."
+        sudo pacman -Sy --noconfirm nodejs npm
+      elif command -v zypper &>/dev/null; then
+        ok "Found zypper"
+        info "Installing Node.js via zypper..."
+        sudo zypper install -y nodejs npm
+      elif command -v apk &>/dev/null; then
+        ok "Found apk"
+        info "Installing Node.js via apk..."
+        sudo apk add --no-cache nodejs npm
+      else
+        return 1
+      fi
+      ;;
+    macos)
+      if command -v brew &>/dev/null; then
+        ok "Found Homebrew"
+        info "Installing Node.js via brew..."
+        brew install node
+      else
+        return 1
+      fi
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+install_node_direct() {
+  info "Downloading Node.js ${NODE_VERSION_FALLBACK} directly from nodejs.org..."
+
+  local node_os node_ext
+  case "$OS" in
+    linux)   node_os="linux" ;;
+    macos)   node_os="darwin" ;;
+    windows) node_os="win" ;;
+    *)       node_os="linux" ;;
+  esac
+
+  if [[ "$node_os" == "win" ]]; then
+    node_ext="zip"
+  else
+    node_ext="tar.gz"
+  fi
+
+  local node_dir="node-${NODE_VERSION_FALLBACK}-${node_os}-${ARCH}"
+  local node_url="https://nodejs.org/dist/${NODE_VERSION_FALLBACK}/${node_dir}.${node_ext}"
+  local node_archive="${TMPDIR}/node.${node_ext}"
+
+  download_file "$node_url" "$node_archive"
+
+  if [[ "$node_ext" == "zip" ]]; then
+    unzip -q "$node_archive" -d "$TMPDIR"
+  else
+    tar -xzf "$node_archive" -C "$TMPDIR"
+  fi
+
+  local node_bin="${TMPDIR}/${node_dir}/bin"
+  if [[ "$node_os" == "win" ]]; then
+    node_bin="${TMPDIR}/${node_dir}"
+  fi
+
+  if [[ -x "${node_bin}/node" || -f "${node_bin}/node.exe" ]]; then
+    export PATH="${node_bin}:${PATH}"
+    ok "Node.js ${NODE_VERSION_FALLBACK} ready (temporary, not permanently installed)"
+  else
+    fail "Failed to download Node.js binary."
+    info "Install Node.js manually from https://nodejs.org/ and try again."
+    exit 1
+  fi
+}
+
+install_node() {
+  info "Detecting package manager..."
+
+  if install_node_via_pkg_manager; then
+    : # installed via package manager
+  else
+    warn "No supported package manager found."
+    install_node_direct
+  fi
+
+  # Verify
+  if command -v node &>/dev/null; then
+    ok "Node.js installed: $(node --version)"
+  else
+    fail "Node.js installation failed."
+    info "Install it manually from https://nodejs.org/ and try again."
+    exit 1
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Preflight
+# ---------------------------------------------------------------------------
+header "Superpowers Enhanced — quick installer"
+echo ""
+
+info "Detected: ${OS} (${ARCH})"
+
+# Ensure temp dir exists early (needed by direct node install)
+TMPDIR="$(mktemp -d)"
+
+# Check for Node.js — install if missing
+if command -v node &>/dev/null; then
+  ok "Node.js found: $(node --version)"
+else
+  warn "Node.js not found — installing automatically..."
+  install_node
+fi
+
+setup_downloader
+ok "${DOWNLOAD} found"
+
+# ---------------------------------------------------------------------------
+# Download and extract
+# ---------------------------------------------------------------------------
+header "Downloading"
+
+TARBALL="${TMPDIR}/repo.tar.gz"
+
+info "Fetching ${REPO}@${BRANCH}..."
+download_file "$TARBALL_URL" "$TARBALL"
+ok "Downloaded tarball"
+
+# Extract — GitHub tarballs have a top-level directory named <repo>-<branch>/
+tar -xzf "$TARBALL" -C "$TMPDIR"
+EXTRACTED="${TMPDIR}/superpowers-enhanced-${BRANCH}"
+
+if [[ ! -d "$EXTRACTED" ]]; then
+  EXTRACTED="$(find "$TMPDIR" -mindepth 1 -maxdepth 1 -type d -name "superpowers*" | head -1)"
+fi
+
+if [[ ! -f "${EXTRACTED}/setup.mjs" ]]; then
+  fail "setup.mjs not found in downloaded archive."
+  exit 1
+fi
+
+ok "Extracted to temp directory"
+
+# ---------------------------------------------------------------------------
+# Run setup
+# ---------------------------------------------------------------------------
+header "Installing"
+echo ""
+
+node "${EXTRACTED}/setup.mjs" --force
+
+echo ""
+ok "Done! Restart OpenCode to activate Superpowers."

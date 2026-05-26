@@ -48,7 +48,7 @@ function timestamp() {
 }
 
 function showHelp() {
-  console.log(`${c(BOLD, 'Superpowers + OpenCode \u2014 config installer')}\n`);
+  console.log(`${c(BOLD, 'Superpowers Enhanced \u2014 config installer')}\n`);
   console.log(`${c(DIM, 'Installs a Superpowers-optimized OpenCode configuration.')}\n`);
   console.log(`${c(BOLD, 'Usage:')}  node setup.mjs [OPTIONS]\n`);
   console.log(`${c(BOLD, 'Options:')}`);
@@ -474,7 +474,7 @@ async function main() {
   parseArgs();
 
   console.log('');
-  outHeader('Superpowers + OpenCode \u2014 config installer');
+  outHeader('Superpowers Enhanced \u2014 config installer');
   outSubdued(`Repo: ${REPO_DIR}`);
   outSubdued(`Config: ${CONFIG_DIR}\n`);
 
