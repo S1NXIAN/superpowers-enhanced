@@ -7,7 +7,7 @@ subagents with TDD, reviews code systematically, and verifies before claiming co
 
 ## Features
 
-- **Superpowers-optimized default agent** — orchestrator mindset, not implementer
+- **Zeus default agent** — orchestrator mindset with hard-coded security triage, not an implementer
 - **AGENTS.md alignment** — user instructions that reinforce skill authority (highest priority)
 - **DeepSeek V4 Flash Free** — capable reasoning for architecture/planning/review, fast enough for iteration
 - **Self-validating setup** — checks Superpowers is installed before configuring
@@ -17,6 +17,7 @@ subagents with TDD, reviews code systematically, and verifies before claiming co
 
 | Protocol | What it does |
 |----------|-------------|
+| **Security Triage** | Hard-coded triggers (file paths, code patterns, directories) that mandate full security audit — bypasses LLM blindness to security context. |
 | **ASI Loop** | Batch-fix isolation — one issue at a time, re-scan, re-prioritize. Prevents merge conflicts and regressions when fixing multiple bugs in overlapping code. |
 | **Deliberation Gate** | Multi-perspective architecture audit — spawns Skeptic, Minimalist, and Maintainer roles before drafting blueprints for complex tasks. |
 | **Ephemeral State Hashing** | Anti-TOCTOU protection — SHA-256 hash verification loop prevents file tampering between check and use. |
@@ -69,21 +70,42 @@ The setup script will:
 |------|-------------|---------|
 | `opencode.json` | `~/.config/opencode/opencode.json` | Model, plugins, default_agent, instructions, skills.paths |
 | `AGENTS.md` | `~/.config/opencode/AGENTS.md` | User instructions — highest priority (outranks skills) |
-| `agent/superpowers.md` | `~/.config/opencode/agent/superpowers.md` | Custom orchestrator agent, set as default |
+| `agent/zeus.md` | `~/.config/opencode/agent/zeus.md` | Custom orchestrator agent, set as default |
 | `skills/` | `~/.config/opencode/skills/superpowers-enhanced/` | Custom skills (ASI Loop, Deliberation Gate, Social Accountability) |
 
 ### Configuration details
 
-- **`default_agent: "superpowers"`** — every session starts with the orchestrator agent
+- **`default_agent: "zeus"`** — every session starts with the orchestrator agent
 - **`instructions: ["AGENTS.md"]`** — Superpowers alignment is prepended to every conversation
 - **`model: "opencode/deepseek-v4-flash-free"`** — primary reasoning model
 - **`small_model: "opencode/deepseek-v4-flash-free"`** — used for subagent dispatch tasks
 - **`skills.paths: ["skills/superpowers-enhanced"]`** — custom skills registered for auto-discovery
-- **`superpowers` agent** — has full tool access (`edit`, `bash`, `task`, `read`) for orchestrator duties
+- **`zeus` agent** — has full tool access (`edit`, `bash`, `task`, `read`) for orchestrator duties
 
 ## Enhanced Protocols
 
-### 1. ASI Loop — Batch Fix Isolation
+### 1. Mandatory Security Triage
+
+**File:** `skills/security-triage/SKILL.md`
+
+Before ANY work begins, every file to be created or modified is checked against hard-coded
+trigger rules. This is NOT a judgment call — it is pattern matching.
+
+Three tiers of triggers:
+- **T1 (File paths):** Any file matching `*auth*/**`, `*secret*/**`, `*token*/**`, `*crypto*/**`,
+  `*cert*/**`, `*deploy*/**`, etc., triggers a full security audit.
+- **T2 (Code content):** Any file containing `import *auth*`, `SECRET_KEY`, `def authenticate*`,
+  `eval(`, etc., triggers a full security audit — regardless of file path.
+- **T3 (Security-adjacent directories):** Any file in `auth/`, `security/`, `crypto/`, `certs/`,
+  `secrets/`, `audit/`, `compliance/`, etc., triggers a full security audit.
+
+When a trigger fires:
+1. STOP — do not proceed with the task as described
+2. FLAG — annotate with `[SECURITY-TRIAGE: <trigger> <pattern>]`
+3. AUDIT — run the full security review checklist (code, dependencies, config, tests)
+4. ESCALATE — production-sensitive findings go to the user before proceeding
+
+### 2. ASI Loop — Batch Fix Isolation
 
 **File:** `skills/asi-loop/SKILL.md`
 
@@ -96,7 +118,7 @@ of batch-fixing: breaking overlapping code by fixing two bugs at once.
 
 **When it triggers:** 3+ issues in overlapping code, interdependent bugs, or a prior batch-fix failure.
 
-### 2. Deliberation Gate — Multi-Perspective Architecture Audit
+### 3. Deliberation Gate — Multi-Perspective Architecture Audit
 
 **File:** `skills/deliberation-gate/SKILL.md`
 
@@ -111,7 +133,7 @@ core idea — each getting exactly one un-debated response:
 
 **Result:** A synthesized, corrected architecture that survived all three critiques.
 
-### 3. Ephemeral State Hashing — Anti-TOCTOU Protection
+### 4. Ephemeral State Hashing — Anti-TOCTOU Protection
 
 **File:** `scripts/verify-hash.sh`
 
@@ -135,7 +157,7 @@ All tracked files can be checked at once:
 ./scripts/verify-hash.sh clear
 ```
 
-### 4. Social Accountability Framing
+### 5. Social Accountability Framing
 
 **Files:** `skills/social-accountability/SKILL.md`, `prompts/implementer.md`, `prompts/spec-reviewer.md`, `prompts/code-quality-reviewer.md`
 
@@ -151,12 +173,14 @@ instead of generic instructions.
 
 ### Integration Flow
 
-These protocols integrate into the standard Superpowers workflow:
+These five protocols integrate into the standard Superpowers workflow:
 
 ```
 [Deliberation Gate] — before blueprint for tier-3 tasks
          ↓
   brainstorming → design doc → user approval
+         ↓
+  [Security Triage] — BEFORE ANY WORK: hard-coded pattern matching
          ↓
   writing-plans → implementation plan → user approval
          ↓
@@ -176,11 +200,12 @@ When OpenCode starts, it:
 
 1. Loads the Superpowers plugin → injects bootstrap → skills auto-trigger
 2. Loads `AGENTS.md` → the agent is instructed to trust skills, follow workflow, use TDD
-3. Uses the `superpowers` agent → orchestrator mindset by default
-4. Loads enhanced skills from `skills.paths` → ASI Loop, Deliberation Gate, Social Accountability
+3. Uses the `zeus` agent → orchestrator mindset by default
+4. Loads enhanced skills from `skills.paths` → Security Triage, ASI Loop, Deliberation Gate, Social Accountability
 
 The result is an agent that:
 
+- **Runs security triage** before ANY work (hard-coded pattern matching, not judgment)
 - **Brainstorms** before building (captures intent, proposes 2-3 approaches)
 - **Deliberates** before architecture (Skeptic → Minimalist → Maintainer critique for complex tasks)
 - **Writes plans** with bite-sized tasks (2-5 min each, complete code in every step)
@@ -199,7 +224,7 @@ After installation, verify the setup:
 # Check symlinks are correct
 ls -la ~/.config/opencode/opencode.json
 ls -la ~/.config/opencode/AGENTS.md
-ls -la ~/.config/opencode/agent/superpowers.md
+ls -la ~/.config/opencode/agent/zeus.md
 ls -la ~/.config/opencode/skills/superpowers-enhanced/
 
 # Each should point to the repo:
@@ -246,7 +271,7 @@ Add an `AGENTS.md` or `CLAUDE.md` to your project root. It merges with the globa
 
 ### Modifying agent behavior
 
-Edit `agent/superpowers.md`. The YAML frontmatter controls model, permissions, and visibility.
+Edit `agent/zeus.md`. The YAML frontmatter controls model, permissions, and visibility.
 The body is the system prompt.
 
 ## Uninstall
@@ -320,12 +345,14 @@ superpowers-opencode/
 ├── README.md              # This file
 ├── opencode.json          # OpenCode configuration
 ├── agent/
-│   └── superpowers.md     # Custom orchestrator agent
+│   └── zeus.md             # Custom orchestrator agent (default)
 ├── skills/
 │   ├── asi-loop/
 │   │   └── SKILL.md       # ASI Batch Patching protocol
 │   ├── deliberation-gate/
 │   │   └── SKILL.md       # Multi-perspective architecture audit
+│   ├── security-triage/
+│   │   └── SKILL.md       # Hard-coded security trigger rules
 │   └── social-accountability/
 │       └── SKILL.md       # Consequence-weighted subagent framing
 ├── prompts/

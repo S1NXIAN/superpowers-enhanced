@@ -23,7 +23,7 @@ BACKUP_PARENT="${CONFIG_DIR}/.backups"
 declare -a MANAGED_FILES=(
   "opencode.json"
   "AGENTS.md"
-  "agent/superpowers.md"
+  "agent/zeus.md"
 )
 
 # Directories managed by setup.sh (config_path)

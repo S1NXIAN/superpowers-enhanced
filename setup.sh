@@ -25,7 +25,7 @@ BACKUP_DIR="${CONFIG_DIR}/.backups/$(date +%Y%m%dT%H%M%S)"
 declare -A FILES=(
   ["opencode.json"]="opencode.json"
   ["AGENTS.md"]="AGENTS.md"
-  ["agent/superpowers.md"]="agent/superpowers.md"
+  ["agent/zeus.md"]="agent/zeus.md"
 )
 
 # Directories to symlink (repo_dir -> config_dir, merged into subdirectory)
@@ -456,9 +456,9 @@ done
 
 # Check that the default_agent resolves
 if command -v python3 &>/dev/null; then
-  AGENT_FILE="${CONFIG_DIR}/agent/superpowers.md"
+  AGENT_FILE="${CONFIG_DIR}/agent/zeus.md"
   if [[ -f "$AGENT_FILE" ]] || [[ -L "$AGENT_FILE" ]]; then
-    ok "Agent file superpowers.md is accessible"
+    ok "Agent file zeus.md is accessible"
   else
     warn "Agent file not found at ${AGENT_FILE}"
   fi

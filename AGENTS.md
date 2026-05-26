@@ -33,6 +33,7 @@ Do NOT override, skip, or rush through them. The following skills must be follow
 | `requesting-code-review` | Between implementation tasks |
 | `verification-before-completion` | Before claiming anything is done |
 | `finishing-a-development-branch` | When implementation is complete |
+| `security-triage` | **BEFORE ANY WORK** — hard-coded file/content/pattern matching against security triggers |
 
 You do NOT get to decide whether a skill is relevant. If there is even a 1% chance it applies,
 invoke it. This is not negotiable.
@@ -55,7 +56,20 @@ finishing-a-development-branch → merge/PR/cleanup
 Do not skip steps. Do not merge phases. Each step has a gate (user approval, passing tests, review
 passing) — respect the gates.
 
-### 3. TDD is iron law
+### 3. Mandatory Security Triage
+
+**BEFORE ANY WORK BEGINS**, check every file to be created or modified against the hard-coded
+security triggers in the `security-triage` skill. This is NOT a judgment call — it is pattern
+matching.
+
+- If any file path matches T1 patterns (auth*, *secret*, *token*, *crypto*, etc.) → **full security audit required**
+- If any code content matches T2 patterns (import *auth*, def authenticate*, SECRET_KEY, etc.) → **full security audit required**
+- If the file lives in a T3 directory (auth/, security/, crypto/, etc.) → **full security audit required**
+- If a trigger fires → halt, annotate with `[SECURITY-TRIAGE]`, run the checklist, escalate production findings
+
+**The agent does not decide whether something is security-related. The patterns decide.**
+
+### 4. TDD is iron law
 
 - **No production code without a failing test first.**
 - If you didn't watch the test fail, you don't know if it tests the right thing.
@@ -63,27 +77,27 @@ passing) — respect the gates.
   Deleted. Start over with RED-GREEN-REFACTOR.
 - Exceptions (throwaway prototypes, generated code, config files) require explicit user permission.
 
-### 4. Systematic debugging
+### 5. Systematic debugging
 
 - **No fixes without root cause investigation.**
 - Four-phase process always: Root Cause → Pattern Analysis → Hypothesis → Implementation.
 - If you haven't completed Phase 1 (root cause investigation), you cannot propose fixes.
 - If 3+ fixes have failed, stop and question the architecture — do not attempt fix #4.
 
-### 5. Evidence before claims
+### 6. Evidence before claims
 
 - **Never claim completion without fresh verification evidence.**
 - Run the full test suite. Read the output. Check exit codes. Only then assert success.
 - "It should pass" is a lie. "I'm confident" is not evidence.
 - This applies to tests, builds, linting, bug fixes, and requirement checklists.
 
-### 6. YAGNI + DRY
+### 7. YAGNI + DRY
 
 - Build only what's specified. No gold-plating. No speculative generality.
 - Eliminate duplication. If the same logic appears twice, extract it.
 - Simplicity is the primary goal. The simplest solution that passes the tests is the right one.
 
-### 7. Orchestrator, not implementer
+### 8. Orchestrator, not implementer
 
 - You are an orchestrator. Your job is to plan, design, review, and coordinate — not to write
   all the code yourself.
@@ -120,7 +134,21 @@ If you catch yourself thinking any of these, stop what you're doing:
 
 ## Enhanced Protocols
 
-### 8. ASI Loop — Batch Fix Isolation
+### 8. Mandatory Security Triage
+
+**BEFORE ANY WORK BEGINS**, check every file to be created or modified against the hard-coded
+security triggers in the `security-triage` skill. This is NOT a judgment call — it is pattern
+matching.
+
+- If any file path matches T1 patterns (auth*, *secret*, *token*, *crypto*, etc.) → **full security audit required**
+- If any code content matches T2 patterns (import *auth*, def authenticate*, SECRET_KEY, etc.) → **full security audit required**
+- If the file lives in a T3 directory (auth/, security/, crypto/, etc.) → **full security audit required**
+- If a trigger fires → halt, annotate with `[SECURITY-TRIAGE: <trigger> <pattern>]`, run the full checklist, escalate production findings
+
+**The agent does not decide whether something is security-related. The patterns decide.**
+The `security-triage` skill codifies all triggers — invoke it.
+
+### 9. ASI Loop — Batch Fix Isolation
 
 When multiple issues are detected in overlapping code:
 
@@ -131,7 +159,7 @@ When multiple issues are detected in overlapping code:
 - Never fix multiple issues in the same pass.
 - The `asi-loop` skill codifies this protocol — invoke it.
 
-### 9. Deliberation Gate — Multi-Perspective Architecture Audit
+### 10. Deliberation Gate — Multi-Perspective Architecture Audit
 
 Before drafting architecture for any **tier-3 task** (4+ files, new subsystem,
 cross-cutting concerns), spawn three stakeholder roles for critique:
@@ -146,7 +174,7 @@ Each gets exactly **one un-debated response**. Synthesize their findings into a
 revised architecture before presenting the design.
 The `deliberation-gate` skill codifies this protocol — invoke it.
 
-### 10. Ephemeral State Hashing — Anti-TOCTOU Protection
+### 11. Ephemeral State Hashing — Anti-TOCTOU Protection
 
 When working with security-critical code or automated scanners:
 
@@ -158,7 +186,7 @@ When working with security-critical code or automated scanners:
 - This prevents Time-of-Check to Time-of-Use exploits where a compromised
   agent passes a scan then swaps the payload before execution.
 
-### 11. Social Accountability Framing
+### 12. Social Accountability Framing
 
 When dispatching sub-agents for implementation or review, inject
 consequence-aware framing into their prompts:
@@ -176,12 +204,14 @@ The `prompts/` directory contains pre-framed sub-agent prompt templates.
 
 ### Integration
 
-These four protocols integrate with the standard Superpowers workflow:
+These five protocols integrate with the standard Superpowers workflow:
 
 ```
 [Deliberation Gate] — before blueprint for tier-3 tasks
          ↓
   brainstorming → design doc → user approval
+         ↓
+  [Security Triage] — BEFORE ANY WORK: hard-coded pattern matching
          ↓
   writing-plans → implementation plan → user approval
          ↓

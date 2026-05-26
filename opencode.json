@@ -13,7 +13,7 @@
     }
   },
   "autoupdate": false,
-  "default_agent": "superpowers",
+  "default_agent": "zeus",
   "instructions": ["AGENTS.md"],
   "model": "opencode/deepseek-v4-flash-free",
   "small_model": "opencode/deepseek-v4-flash-free",
