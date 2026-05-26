@@ -76,7 +76,45 @@ Before touching the next issue, recalculate:
 
 Remove the fixed issue from the list.
 
-### Step 6: Repeat
+### Step 6: Cycle Counter — Anti-Infinite Loop Guard
+
+Increment a cycle counter at the end of each iteration:
+
+```
+Current cycle: C
+Max cycles:    4
+```
+
+If `C > 4` on the same macro-task (top-level issue set):
+
+1. **Halt immediately.** Do not attempt cycle #5.
+2. **Preserve the active diff state** — save `git diff` output (or equivalent patch file) so no work is lost.
+3. **Prompt the user with a diagnostic summary:**
+
+   ```
+   [ASI-LOOP] Cycle limit reached (4/4) on: <macro-task description>
+   
+   Fixed so far:
+     - Issue #<id>: <outcome>
+     - Issue #<id>: <outcome>
+   
+   Remaining:
+     - Issue #<id>: <reason not fixed>
+     - Issue #<id>: <reason not fixed>
+   
+   Stuck on: Issue #<id> — <reason the loop keeps cycling>
+   
+   Suggested causes:
+     a) Fix creates new issues faster than it resolves them
+     b) Fix changes an interface used by 5+ files — waterfall effect
+     c) Remaining issues depend on a structural change that cascades
+   
+   Patch preserved at: /tmp/asi-loop-patch-<timestamp>.diff
+   ```
+
+4. **Do not auto-resume.** Wait for user direction — they may accept partial progress, approve a broader refactor, or divide the work into independent sub-tasks.
+
+### Step 7: Repeat
 
 Return to Step 2 with the updated list. Continue until all issues are resolved.
 
@@ -102,6 +140,7 @@ It is **optional but recommended** for:
 | "I'll fix the easy ones quickly, then tackle the hard one" | Easy fixes change state the hard one depends on |
 | "Let me just also fix this nearby issue while I'm here" | Scope creep breaks isolation |
 | Fixing issue #3 without re-checking issues #1, #2 first | Dynamic update step was skipped |
+| "One more cycle should do it" (after cycle 4) | Coupling limit — fix cascades across files. Halt & escalate. |
 
 ## Checklist
 
@@ -111,3 +150,4 @@ It is **optional but recommended** for:
 - [ ] Fast re-test on affected files only (exit 0)
 - [ ] Issue list updated and re-prioritized after each fix
 - [ ] No scope creep during any iteration
+- [ ] Cycle counter tracked (C ≤ 4); if limit reached, save diff + prompt user
