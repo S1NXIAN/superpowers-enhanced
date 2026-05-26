@@ -115,3 +115,82 @@ If you catch yourself thinking any of these, stop what you're doing:
   - 1-2 files, complete spec → capable of cheaper model
   - Multi-file integration → standard model
   - Design judgment, architecture → most capable model
+
+---
+
+## Enhanced Protocols
+
+### 8. ASI Loop — Batch Fix Isolation
+
+When multiple issues are detected in overlapping code:
+
+- **Isolate and fix exactly ONE issue per iteration.**
+- After each fix, force a fast re-test and re-scan **only on affected files**.
+- Dynamically update the remaining issues list: re-scan fixed files, re-prioritize
+  based on new file state, remove resolved issues, add newly discovered ones.
+- Never fix multiple issues in the same pass.
+- The `asi-loop` skill codifies this protocol — invoke it.
+
+### 9. Deliberation Gate — Multi-Perspective Architecture Audit
+
+Before drafting architecture for any **tier-3 task** (4+ files, new subsystem,
+cross-cutting concerns), spawn three stakeholder roles for critique:
+
+| Role | Focus |
+|------|-------|
+| **Skeptic** | Why this will fail at scale (concurrency, bottlenecks, race conditions) |
+| **Minimalist** | How to achieve this with existing utilities, no new deps, smallest change |
+| **Maintainer** | Long-term tech debt, testability, next-developer comprehension |
+
+Each gets exactly **one un-debated response**. Synthesize their findings into a
+revised architecture before presenting the design.
+The `deliberation-gate` skill codifies this protocol — invoke it.
+
+### 10. Ephemeral State Hashing — Anti-TOCTOU Protection
+
+When working with security-critical code or automated scanners:
+
+- After a sub-agent writes a file, generate its SHA-256 hash using
+  `scripts/verify-hash.sh store <file>`.
+- Before test execution or deployment, recalculate the hash using
+  `scripts/verify-hash.sh verify <file>`.
+- If the hash mutated between check and use: **kill execution, alert, investigate**.
+- This prevents Time-of-Check to Time-of-Use exploits where a compromised
+  agent passes a scan then swaps the payload before execution.
+
+### 11. Social Accountability Framing
+
+When dispatching sub-agents for implementation or review, inject
+consequence-aware framing into their prompts:
+
+- **Implementer:** "An auto-fix pipeline depends on your accuracy. A missed test
+  case ships regressions. A bug wastes a full validation cycle."
+- **Spec Reviewer:** "A false positive wastes a cycle. A missed spec gap ships
+  without a feature — rework costs 10x later."
+- **Code Reviewer:** "You are the LAST gate before production. Approving
+  structural issues compounds tech debt. Rejecting for style preference
+  damages velocity."
+
+The `social-accountability` skill contains the full framing templates.
+The `prompts/` directory contains pre-framed sub-agent prompt templates.
+
+### Integration
+
+These four protocols integrate with the standard Superpowers workflow:
+
+```
+[Deliberation Gate] — before blueprint for tier-3 tasks
+         ↓
+  brainstorming → design doc → user approval
+         ↓
+  writing-plans → implementation plan → user approval
+         ↓
+  [Social Accountability] — in subagent dispatch prompts
+         ↓
+  subagent-driven-development → execute task-by-task
+         ↓
+    [ASI Loop] — when multiple issues found in reviews
+    [Ephemeral Hashing] — for security-critical patches
+         ↓
+  finishing-a-development-branch → merge/PR/cleanup
+```

@@ -16,5 +16,8 @@
   "default_agent": "superpowers",
   "instructions": ["AGENTS.md"],
   "model": "opencode/deepseek-v4-flash-free",
-  "small_model": "opencode/deepseek-v4-flash-free"
+  "small_model": "opencode/deepseek-v4-flash-free",
+  "skills": {
+    "paths": ["skills/superpowers-enhanced"]
+  }
 }

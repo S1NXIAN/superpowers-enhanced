@@ -28,6 +28,11 @@ declare -A FILES=(
   ["agent/superpowers.md"]="agent/superpowers.md"
 )
 
+# Directories to symlink (repo_dir -> config_dir, merged into subdirectory)
+declare -A DIRECTORIES=(
+  ["skills"]="skills/superpowers-enhanced"
+)
+
 # ---------------------------------------------------------------------------
 # Terminal styling
 # ---------------------------------------------------------------------------
@@ -74,6 +79,8 @@ ${BOLD}What it does:${NC}
   3. Shows a diff of files that would change
   4. Backs up existing files to ~/.config/opencode/.backups/<timestamp>/
   5. Symlinks repo files → ~/.config/opencode/
+  6. Symlinks enhanced skills (asi-loop, deliberation-gate, social-accountability)
+  7. Registers skills via skills.paths in opencode.json
 
 ${BOLD}Uninstall:${NC}  ./uninstall.sh
 EOF
@@ -351,11 +358,57 @@ for rel_path in "${!FILES[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
+# Install: directory symlinks (skills, etc.)
+# ---------------------------------------------------------------------------
+for rel_path in "${!DIRECTORIES[@]}"; do
+  repo_dir="${REPO_DIR}/${rel_path}"
+  config_subdir="${CONFIG_DIR}/${DIRECTORIES[$rel_path]}"
+  config_parent="$(dirname "$config_subdir")"
+
+  # Source must exist
+  if [[ ! -d "$repo_dir" ]]; then
+    warn "Missing in repo: ${rel_path}/ — skipping"
+    ((SKIPPED_COUNT++))
+    continue
+  fi
+
+  # Ensure parent directory exists
+  if [[ ! -d "$config_parent" ]]; then
+    mkdir -p "$config_parent"
+    info "Created directory ${config_parent}"
+  fi
+
+  # Backup existing real directory (not a symlink)
+  if [[ -d "$config_subdir" ]] && [[ ! -L "$config_subdir" ]]; then
+    mkdir -p "$BACKUP_DIR"
+    cp -r "$config_subdir" "${BACKUP_DIR}/${DIRECTORIES[$rel_path]}" 2>/dev/null || true
+    ok "Backed up ${DIRECTORIES[$rel_path]}/ → ${BACKUP_DIR}"
+    ((BACKED_UP_COUNT++))
+  fi
+
+  # Create or update symlink
+  if [[ -L "$config_subdir" ]]; then
+    current_target="$(readlink "$config_subdir")"
+    if [[ "$current_target" == "$repo_dir" ]]; then
+      subdued "Already current: ${DIRECTORIES[$rel_path]}/"
+      ((SKIPPED_COUNT++))
+      continue
+    fi
+  fi
+
+  ln -sfn "$repo_dir" "$config_subdir"
+  ok "Linked ${DIRECTORIES[$rel_path]}/ → ${config_subdir}"
+  ((INSTALLED_COUNT++))
+done
+
+# ---------------------------------------------------------------------------
 # Verify installation
 # ---------------------------------------------------------------------------
 header "Verification"
 
 VERIFY_FAILED=false
+
+# Verify file symlinks
 for rel_path in "${!FILES[@]}"; do
   config_file="${CONFIG_DIR}/${FILES[$rel_path]}"
   repo_file="${REPO_DIR}/${rel_path}"
@@ -374,6 +427,31 @@ for rel_path in "${!FILES[@]}"; do
   fi
 
   ok "${FILES[$rel_path]} → ${target}"
+done
+
+# Verify directory symlinks
+for rel_path in "${!DIRECTORIES[@]}"; do
+  config_subdir="${CONFIG_DIR}/${DIRECTORIES[$rel_path]}"
+  repo_dir="${REPO_DIR}/${rel_path}"
+
+  if [[ ! -L "$config_subdir" ]]; then
+    warn "${DIRECTORIES[$rel_path]}/ is not a symlink — skills may not be discoverable"
+    continue
+  fi
+
+  target="$(readlink "$config_subdir")"
+  if [[ "$target" != "$repo_dir" ]]; then
+    warn "${DIRECTORIES[$rel_path]}/ points to ${target}, expected ${repo_dir}"
+    continue
+  fi
+
+  # Verify at least one SKILL.md is accessible
+  skill_count=$(find "$config_subdir" -name "SKILL.md" -type f 2>/dev/null | wc -l)
+  if (( skill_count > 0 )); then
+    ok "${DIRECTORIES[$rel_path]}/ → ${target} (${skill_count} skills)"
+  else
+    warn "${DIRECTORIES[$rel_path]}/ → ${target} (no SKILL.md files found)"
+  fi
 done
 
 # Check that the default_agent resolves

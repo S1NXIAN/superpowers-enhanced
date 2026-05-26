@@ -13,6 +13,15 @@ subagents with TDD, reviews code systematically, and verifies before claiming co
 - **Self-validating setup** — checks Superpowers is installed before configuring
 - **Safe install** — backs up existing files, shows diff, asks before overwriting
 
+### Enhanced Protocols
+
+| Protocol | What it does |
+|----------|-------------|
+| **ASI Loop** | Batch-fix isolation — one issue at a time, re-scan, re-prioritize. Prevents merge conflicts and regressions when fixing multiple bugs in overlapping code. |
+| **Deliberation Gate** | Multi-perspective architecture audit — spawns Skeptic, Minimalist, and Maintainer roles before drafting blueprints for complex tasks. |
+| **Ephemeral State Hashing** | Anti-TOCTOU protection — SHA-256 hash verification loop prevents file tampering between check and use. |
+| **Social Accountability** | Consequence-weighted sub-agent prompts — reduces hallucination by assigning real-world cost to mistakes. |
+
 ## Prerequisites
 
 - [OpenCode](https://opencode.ai) installed and started at least once
@@ -44,7 +53,8 @@ The setup script will:
 4. Show a diff of planned changes
 5. Back up existing files before overwriting
 6. Symlink repo files → config directory
-7. Verify everything is connected correctly
+7. Symlink enhanced skills for discoverability
+8. Verify everything is connected correctly
 
 ### Non-interactive install
 
@@ -57,9 +67,10 @@ The setup script will:
 
 | File | Destination | Purpose |
 |------|-------------|---------|
-| `opencode.json` | `~/.config/opencode/opencode.json` | Model, plugins, default_agent, instructions |
+| `opencode.json` | `~/.config/opencode/opencode.json` | Model, plugins, default_agent, instructions, skills.paths |
 | `AGENTS.md` | `~/.config/opencode/AGENTS.md` | User instructions — highest priority (outranks skills) |
 | `agent/superpowers.md` | `~/.config/opencode/agent/superpowers.md` | Custom orchestrator agent, set as default |
+| `skills/` | `~/.config/opencode/skills/superpowers-enhanced/` | Custom skills (ASI Loop, Deliberation Gate, Social Accountability) |
 
 ### Configuration details
 
@@ -67,7 +78,97 @@ The setup script will:
 - **`instructions: ["AGENTS.md"]`** — Superpowers alignment is prepended to every conversation
 - **`model: "opencode/deepseek-v4-flash-free"`** — primary reasoning model
 - **`small_model: "opencode/deepseek-v4-flash-free"`** — used for subagent dispatch tasks
+- **`skills.paths: ["skills/superpowers-enhanced"]`** — custom skills registered for auto-discovery
 - **`superpowers` agent** — has full tool access (`edit`, `bash`, `task`, `read`) for orchestrator duties
+
+## Enhanced Protocols
+
+### 1. ASI Loop — Batch Fix Isolation
+
+**File:** `skills/asi-loop/SKILL.md`
+
+When a scan or review surfaces multiple issues, the ASI Loop prevents the most common failure mode
+of batch-fixing: breaking overlapping code by fixing two bugs at once.
+
+```
+[Issue List] → Isolate ONE → TDD Fix → Re-test → Re-scan → Update List → Repeat
+```
+
+**When it triggers:** 3+ issues in overlapping code, interdependent bugs, or a prior batch-fix failure.
+
+### 2. Deliberation Gate — Multi-Perspective Architecture Audit
+
+**File:** `skills/deliberation-gate/SKILL.md`
+
+Before drafting architecture for complex (tier-3) tasks, three stakeholder roles critique the
+core idea — each getting exactly one un-debated response:
+
+| Role | Focus |
+|------|-------|
+| **Skeptic** | Why it fails at scale (concurrency, bottlenecks, race conditions) |
+| **Minimalist** | How to achieve it with existing utilities, no new deps |
+| **Maintainer** | Long-term tech debt, testability, next-developer comprehension |
+
+**Result:** A synthesized, corrected architecture that survived all three critiques.
+
+### 3. Ephemeral State Hashing — Anti-TOCTOU Protection
+
+**File:** `scripts/verify-hash.sh`
+
+Prevents Time-of-Check to Time-of-Use exploits where a compromised sub-agent passes a scan
+then swaps the payload before execution:
+
+```bash
+# After sub-agent writes a file
+./scripts/verify-hash.sh store path/to/file.py
+
+# Before test execution or deployment
+./scripts/verify-hash.sh verify path/to/file.py
+
+# If hash changed: exit code 1, alert thrown, execution blocked
+```
+
+All tracked files can be checked at once:
+```bash
+./scripts/verify-hash.sh check
+./scripts/verify-hash.sh status
+./scripts/verify-hash.sh clear
+```
+
+### 4. Social Accountability Framing
+
+**Files:** `skills/social-accountability/SKILL.md`, `prompts/implementer.md`, `prompts/spec-reviewer.md`, `prompts/code-quality-reviewer.md`
+
+Sub-agent prompts with consequence-weighted framing. Each role gets clear downstream
+consequences for failure:
+
+- **Implementer:** "A missed test case ships regressions. A bug wastes a full validation cycle."
+- **Spec Reviewer:** "A false positive wastes a cycle. A missed spec gap ships without a feature."
+- **Code Reviewer:** "You are the LAST gate before production. Structural issues compound tech debt."
+
+The `prompts/` directory contains pre-framed templates that the orchestrator dispatches
+instead of generic instructions.
+
+### Integration Flow
+
+These protocols integrate into the standard Superpowers workflow:
+
+```
+[Deliberation Gate] — before blueprint for tier-3 tasks
+         ↓
+  brainstorming → design doc → user approval
+         ↓
+  writing-plans → implementation plan → user approval
+         ↓
+  [Social Accountability] — in subagent dispatch prompts
+         ↓
+  subagent-driven-development → execute task-by-task
+         ↓
+    [ASI Loop] — when multiple issues found in reviews
+    [Ephemeral Hashing] — for security-critical patches
+         ↓
+  finishing-a-development-branch → merge/PR/cleanup
+```
 
 ## How It Works
 
@@ -76,12 +177,16 @@ When OpenCode starts, it:
 1. Loads the Superpowers plugin → injects bootstrap → skills auto-trigger
 2. Loads `AGENTS.md` → the agent is instructed to trust skills, follow workflow, use TDD
 3. Uses the `superpowers` agent → orchestrator mindset by default
+4. Loads enhanced skills from `skills.paths` → ASI Loop, Deliberation Gate, Social Accountability
 
 The result is an agent that:
 
 - **Brainstorms** before building (captures intent, proposes 2-3 approaches)
+- **Deliberates** before architecture (Skeptic → Minimalist → Maintainer critique for complex tasks)
 - **Writes plans** with bite-sized tasks (2-5 min each, complete code in every step)
-- **Dispatches subagents** for implementation (fresh context per task)
+- **Dispatches subagents** with accountability-framed prompts
+- **Uses ASI Loop** when fixing batch issues (one fix at a time, re-scan between each)
+- **Verifies file integrity** with SHA-256 hashing for security-critical work
 - **Reviews** spec compliance then code quality between tasks
 - **Verifies** with fresh evidence before claiming completion
 - **Debugs** systematically (root cause first, never random fixes)
@@ -95,10 +200,19 @@ After installation, verify the setup:
 ls -la ~/.config/opencode/opencode.json
 ls -la ~/.config/opencode/AGENTS.md
 ls -la ~/.config/opencode/agent/superpowers.md
+ls -la ~/.config/opencode/skills/superpowers-enhanced/
 
 # Each should point to the repo:
 #   ~/.config/opencode/opencode.json -> ~/superpowers-opencode/opencode.json
 #   ...
+
+# Verify enhanced skills are discoverable
+ls ~/.config/opencode/skills/superpowers-enhanced/*/SKILL.md
+
+# Test the hash verification script
+./scripts/verify-hash.sh store scripts/verify-hash.sh
+./scripts/verify-hash.sh verify scripts/verify-hash.sh
+# Should exit 0 — "Integrity verified"
 ```
 
 Then restart OpenCode and try:
@@ -120,6 +234,11 @@ Edit `opencode.json`:
 }
 ```
 
+### Modifying enhanced skills
+
+Edit the files in `skills/` or `prompts/`. The skills are registered via `skills.paths`
+in `opencode.json`. No symlink update needed — changes are live after restart.
+
 ### Adding project-specific instructions
 
 Add an `AGENTS.md` or `CLAUDE.md` to your project root. It merges with the global file
@@ -137,7 +256,8 @@ cd ~/superpowers-opencode
 ./uninstall.sh
 ```
 
-This removes the symlinks and restores the most recent backup if one exists.
+This removes all symlinks (files + skills directory) and restores the most recent backup
+if one exists.
 
 To fully remove Superpowers from your config, delete the plugin line from `opencode.json`:
 
@@ -155,6 +275,13 @@ To fully remove Superpowers from your config, delete the plugin line from `openc
    ```
 2. Restart OpenCode so it resolves and installs the plugin.
 3. Run `./setup.sh` again.
+
+### Enhanced skills not auto-triggering
+
+1. Verify the symlink: `ls -la ~/.config/opencode/skills/superpowers-enhanced/`
+2. Check skills.paths in opencode.json contains `"skills/superpowers-enhanced"`
+3. Verify each skill has a valid `SKILL.md` with YAML frontmatter
+4. Restart OpenCode — skills are loaded at startup
 
 ### Skills not auto-triggering
 
@@ -188,14 +315,27 @@ Changes take effect after restarting OpenCode.
 
 ```
 superpowers-opencode/
-├── AGENTS.md          # User instructions (highest priority)
-├── LICENSE            # MIT
-├── README.md          # This file
-├── opencode.json      # OpenCode configuration
+├── AGENTS.md              # User instructions (highest priority)
+├── LICENSE                # MIT
+├── README.md              # This file
+├── opencode.json          # OpenCode configuration
 ├── agent/
-│   └── superpowers.md # Custom orchestrator agent
-├── setup.sh           # Install script with validation
-└── uninstall.sh       # Clean removal script
+│   └── superpowers.md     # Custom orchestrator agent
+├── skills/
+│   ├── asi-loop/
+│   │   └── SKILL.md       # ASI Batch Patching protocol
+│   ├── deliberation-gate/
+│   │   └── SKILL.md       # Multi-perspective architecture audit
+│   └── social-accountability/
+│       └── SKILL.md       # Consequence-weighted subagent framing
+├── prompts/
+│   ├── implementer.md     # Enhanced subagent prompt with accountability
+│   ├── spec-reviewer.md   # Enhanced spec reviewer prompt
+│   └── code-quality-reviewer.md  # Enhanced code reviewer prompt
+├── scripts/
+│   └── verify-hash.sh     # Ephemeral State Hashing (anti-TOCTOU)
+├── setup.sh               # Install script with validation
+└── uninstall.sh           # Clean removal script
 ```
 
 ## License

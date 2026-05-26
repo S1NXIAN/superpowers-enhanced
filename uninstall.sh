@@ -26,6 +26,11 @@ declare -a MANAGED_FILES=(
   "agent/superpowers.md"
 )
 
+# Directories managed by setup.sh (config_path)
+declare -a MANAGED_DIRECTORIES=(
+  "skills/superpowers-enhanced"
+)
+
 # ---------------------------------------------------------------------------
 # Terminal styling
 # ---------------------------------------------------------------------------
@@ -174,11 +179,35 @@ for config_file in "${FOUND_SYMLINKS[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
-# Clean up empty agent directory
+# Remove managed directory symlinks
+# ---------------------------------------------------------------------------
+for dir_rel in "${MANAGED_DIRECTORIES[@]}"; do
+  config_dir="${CONFIG_DIR}/${dir_rel}"
+
+  if [[ ! -L "$config_dir" ]]; then
+    continue
+  fi
+
+  target="$(readlink "$config_dir")"
+  if [[ "$target" == "${REPO_DIR}/${dir_rel%%/*}" ]]; then
+    rm "$config_dir"
+    ok "Removed directory symlink: ${dir_rel}/"
+    ((REMOVED_COUNT++))
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# Clean up empty directories
 # ---------------------------------------------------------------------------
 AGENT_DIR="${CONFIG_DIR}/agent"
 if [[ -d "$AGENT_DIR" ]] && [[ -z "$(ls -A "$AGENT_DIR" 2>/dev/null)" ]]; then
   rmdir "$AGENT_DIR" 2>/dev/null && subdued "Removed empty directory: ${AGENT_DIR}"
+fi
+
+SKILLS_ENHANCED="${CONFIG_DIR}/skills/superpowers-enhanced"
+SKILLS_DIR="${CONFIG_DIR}/skills"
+if [[ -d "$SKILLS_DIR" ]] && [[ -z "$(ls -A "$SKILLS_DIR" 2>/dev/null)" ]]; then
+  rmdir "$SKILLS_DIR" 2>/dev/null && subdued "Removed empty directory: ${SKILLS_DIR}"
 fi
 
 # ---------------------------------------------------------------------------
