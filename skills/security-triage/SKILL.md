@@ -134,22 +134,19 @@ When security triage is triggered, the following checks are MANDATORY:
 
 ### Code Review
 
-- [ ] All secrets/credentials are externalized (env vars, vault, secrets manager)
-- [ ] No secrets in code, comments, commit messages, or logs
-- [ ] Input validation present for all external inputs
 - [ ] Output encoding/escaping applied at all trust boundaries
-- [ ] SQL/command injection vectors identified and mitigated
-- [ ] Authentication checks applied at correct boundaries
-- [ ] Authorization checks applied on every protected operation
 - [ ] Session management follows secure patterns (rotation, expiry, httpOnly)
-- [ ] Rate limiting/throttling on sensitive endpoints
 - [ ] CSRF protection on state-changing operations
+- [ ] Authentication/Authorization — verify auth checks at every protected boundary, test for privilege escalation
+- [ ] Secrets exposure — no secrets in code, comments, git history, or logs; must be externalized to env vars or vault
+- [ ] Injection defense — SQL/command/NoSQL injection at every untrusted input boundary; parameterized queries required
+- [ ] Rate limiting/throttling on sensitive endpoints (brute force protection)
 
 ### Dependency Review
 
 - [ ] No known-vulnerable dependencies introduced
 - [ ] Dependency versions are pinned (not floating ranges)
-- [ ] New dependencies have been vetted for supply-chain risk
+- [ ] New dependencies vetted for supply-chain risk (source, maintenance, license)
 
 ### Configuration Review
 
@@ -161,11 +158,9 @@ When security triage is triggered, the following checks are MANDATORY:
 
 ### Testing Review
 
-- [ ] Negative test cases cover auth failures
-- [ ] Injection attack vectors are tested (SQLi, XSS, command injection)
-- [ ] Permission escalation scenarios are tested
 - [ ] Rate limiting behavior is verified
 - [ ] Secrets rotation/replacement is tested
+- [ ] Adversarial test cases — negative tests cover auth bypass, injection attempts, privilege escalation, boundary overflow
 
 ---
 
