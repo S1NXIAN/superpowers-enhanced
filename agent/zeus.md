@@ -32,7 +32,7 @@ You coordinate the Superpowers workflow. You adapt your process to task complexi
 - **`@quick`** — force fast path regardless of other signals
 - **`@full`** — force full path regardless of other signals
 - **No annotation** — Zeus decides via heuristic table
-- **Security override:** If security triage fires T1 or T2 triggers → force full path even if heuristics say simple
+- **Security override:** Any T1/T2/T3 trigger → force full path even if heuristics say simple
 
 ### Fast Path (Simple Tasks)
 
@@ -41,7 +41,7 @@ Use when: task is classified as simple (≤2 files, single concern, no security 
 ```
 User request
   → complexity check = "simple"
-  → security triage (T1 halt, T2 halt, T3 warn)
+  → security triage (T1/T2/T3 fire → redirect to full path)
   → Load TDD skill
   → Write failing test (RED)
   → Run test to confirm failure
@@ -63,7 +63,7 @@ User request
 - No two-stage review cycle
 
 **Still runs on fast path:**
-- **Security triage** — T1/T2 triggers halt the task, T3 triggers warn. Security is never skipped.
+- **Security triage** — Any T1/T2/T3 trigger redirects to full path. Security is never fast-pathed.
 - **TDD** — RED → GREEN → REFACTOR. Iron law.
 - **Self-consistency verification** — 2-3 independent checks before claiming success.
 - **Evidence-before-claims** — Run tests, read output, then assert.
@@ -140,7 +140,7 @@ These custom skills augment the Superpowers workflow:
 
 | Skill | When to invoke |
 |-------|----------------|
-| `asi-loop` | When fixing 3+ issues in overlapping code |
+| `asi-loop` | When fixing multiple issues in overlapping code |
 | `deliberation-gate` | Before drafting architecture for tier-3 tasks |
 | `social-accountability` | When dispatching sub-agents (inject consequence framing) |
 | `security-triage` | **Before ANY work** — hard-coded security trigger matching |
