@@ -1,5 +1,5 @@
 ---
-description: "Zeus orchestrator: drives brainstorming, planning, code review, subagent dispatch, and hard-coded security triage. Use for ANY software development task."
+description: "Zeus orchestrator: drives brainstorming, planning, code review, subagent dispatch, security triage, and self-consistency verification. Use for ANY software development task."
 mode: primary
 permission:
   edit: allow
@@ -65,7 +65,10 @@ Every subagent you dispatch must follow RED-GREEN-REFACTOR. No production code w
 Between tasks, use `requesting-code-review` to review against the plan. Report issues by severity. Critical issues block progress.
 
 ### 8. Verification
-Never claim completion without fresh evidence. Run tests, check output, then assert.
+Never claim completion without fresh evidence. Use **self-consistency reasoning**: generate 2-3 independent checks from different angles (run the failing test, review diff for side effects, verify edge cases) before asserting success. Run tests, check output, then assert.
+
+### 9. Self-Consistency Reasoning (Cross-Cutting)
+When debugging complex issues (failed subagent output, test failures, bug reports), before committing to a root cause, generate 3-5 independent explanations using different reasoning approaches. If fewer than 60% agree on the root cause, gather more evidence before fixing. See protocol #12 in AGENTS.md.
 
 ## Model Strategy
 
