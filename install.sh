@@ -106,13 +106,18 @@ download_file() {
 # Node.js installation
 # ---------------------------------------------------------------------------
 install_node_via_pkg_manager() {
+  # Check that sudo is available before attempting package manager installs
+  if [[ "$OS" != "macos" ]] && ! command -v sudo &>/dev/null; then
+    return 1
+  fi
+
   case "$OS" in
     linux)
       if command -v apt-get &>/dev/null; then
         ok "Found apt"
         info "Installing Node.js via apt..."
-        sudo apt-get update -qq
-        sudo apt-get install -y -qq nodejs npm
+        sudo apt-get update -qq || { warn "apt update failed, trying direct download..."; return 1; }
+        sudo apt-get install -y -qq nodejs npm || return 1
       elif command -v dnf &>/dev/null; then
         ok "Found dnf"
         info "Installing Node.js via dnf..."
@@ -216,6 +221,19 @@ install_node() {
   fi
 }
 
+check_node_version() {
+  local version major
+  version="$(node --version 2>/dev/null)"
+  major="${version%%.*}"
+  major="${major#v}"
+  if [[ -z "$major" || "$major" -lt 18 ]]; then
+    fail "Node.js ${version:-unknown} is too old. Version 18+ is required."
+    info "Install Node.js 18+ from https://nodejs.org/ and try again."
+    exit 1
+  fi
+  ok "Node.js ${version} (>=18)"
+}
+
 # ---------------------------------------------------------------------------
 # Preflight
 # ---------------------------------------------------------------------------
@@ -230,9 +248,11 @@ TMPDIR="$(mktemp -d)" || { fail "Failed to create temporary directory."; exit 1;
 # Check for Node.js — install if missing
 if command -v node &>/dev/null; then
   ok "Node.js found: $(node --version)"
+  check_node_version
 else
   warn "Node.js not found — installing automatically..."
   install_node
+  check_node_version
 fi
 
 setup_downloader

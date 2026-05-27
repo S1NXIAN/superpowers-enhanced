@@ -69,6 +69,25 @@ function Install-NodeJS {
 }
 
 # ---------------------------------------------------------------------------
+# Node.js version check
+# ---------------------------------------------------------------------------
+function Assert-NodeVersion {
+    $version = node --version
+    if ($version -match '^v(\d+)\.') {
+        $major = [int]$Matches[1]
+        if ($major -lt 18) {
+            Write-Fail "Node.js $version is too old. Version 18+ is required."
+            Write-Info "Install Node.js 18+ from https://nodejs.org/ and try again."
+            exit 1
+        }
+        Write-Ok "Node.js $version (>=18)"
+    }
+    else {
+        Write-Warn "Could not detect Node.js version"
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Preflight
 # ---------------------------------------------------------------------------
 Write-Header "Superpowers Enhanced — quick installer"
@@ -81,6 +100,8 @@ else {
     Write-Warn "Node.js not found — installing automatically..."
     Install-NodeJS
 }
+
+Assert-NodeVersion
 
 # ---------------------------------------------------------------------------
 # Download and extract
@@ -114,15 +135,15 @@ Write-Ok "Extracted to temp directory"
 # ---------------------------------------------------------------------------
 # Run setup
 # ---------------------------------------------------------------------------
-Write-Header "Installing"
-Write-Host ""
-
-node (Join-Path $Extracted "setup.mjs") --force
+try {
+    node (Join-Path $Extracted "setup.mjs") --force
+}
+finally {
+    # Cleanup temp directory even if install fails
+    if (Test-Path $TmpDir) {
+        Remove-Item -Path $TmpDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 
 Write-Host ""
 Write-Ok "Done! Restart OpenCode to activate Superpowers."
-
-# ---------------------------------------------------------------------------
-# Cleanup
-# ---------------------------------------------------------------------------
-Remove-Item -Path $TmpDir -Recurse -Force -ErrorAction SilentlyContinue

@@ -39,7 +39,6 @@ function outSubdued(msg) { console.log(`  ${c(DIM, msg)}`); }
 let backupDir = null;
 let forceMode = false;
 let dryRunMode = false;
-let preflightFailed = false;
 
 function timestamp() {
   const d = new Date();
@@ -57,7 +56,7 @@ function showHelp() {
   console.log('  --help        Show this help and exit\n');
   console.log(`${c(BOLD, 'What it does:')}`);
   console.log('  1. Validates that OpenCode is installed');
-  console.log('  2. Merges opencode.json config (plugin, default_agent, instructions, skills.paths)');
+  console.log('  2. Merges opencode.json config (plugin, default_agent, instructions, skills.paths,\n     enable_experimental_skills, autoupdate)');
   console.log('  3. Shows planned changes before applying');
   console.log('  4. Backs up existing files to ~/.config/opencode/.backups/<timestamp>/');
   console.log('  5. Copies repo files into ~/.config/opencode/');
@@ -184,8 +183,25 @@ function copyDir(src, dest, { dryRun = false } = {}) {
   return true;
 }
 
+function checkNodeVersion() {
+  const match = process.version.match(/^v(\d+)\./);
+  if (!match) {
+    outWarn('Could not detect Node.js version');
+    return;
+  }
+  const major = parseInt(match[1], 10);
+  if (major < 18) {
+    outError(`Node.js ${process.version} is too old. Version 18+ is required.`);
+    outInfo('Install Node.js 18+ from https://nodejs.org/ and try again.');
+    process.exit(1);
+  }
+  outOk(`Node.js ${process.version} (>=18)`);
+}
+
 function preflight() {
   outHeader('Prerequisites');
+
+  checkNodeVersion();
 
   if (!existsSync(CONFIG_JSON_PATH)) {
     outWarn(`OpenCode config not found at ${CONFIG_JSON_PATH}`);
@@ -215,10 +231,6 @@ function preflight() {
   } else {
     outWarn('git not found \u2014 diff display will be limited');
   }
-
-  if (preflightFailed) {
-    process.exit(1);
-  }
 }
 
 function planJsonMerge(existingConfig) {
@@ -244,6 +256,14 @@ function planJsonMerge(existingConfig) {
     const beforePaths = existingConfig.skills?.paths ? [...existingConfig.skills.paths] : [];
     const afterPaths = [...skillsPaths, SKILLS_PATH];
     changes.push({ field: 'skills.paths', before: beforePaths, after: afterPaths });
+  }
+
+  if (existingConfig.enable_experimental_skills !== true) {
+    changes.push({ field: 'enable_experimental_skills', before: existingConfig.enable_experimental_skills, after: true });
+  }
+
+  if (existingConfig.autoupdate !== false) {
+    changes.push({ field: 'autoupdate', before: existingConfig.autoupdate, after: false });
   }
 
   return changes;
@@ -376,6 +396,12 @@ function installConfig(configChanges) {
         if (!config.skills) config.skills = {};
         config.skills.paths = change.after;
         break;
+      case 'enable_experimental_skills':
+        config.enable_experimental_skills = change.after;
+        break;
+      case 'autoupdate':
+        config.autoupdate = change.after;
+        break;
     }
   }
 
@@ -441,6 +467,19 @@ function verify() {
     } else {
       outError('skills.paths missing skills/superpowers-enhanced');
       verifyFailed = true;
+    }
+
+    if (config.enable_experimental_skills === true) {
+      outOk('enable_experimental_skills is true');
+    } else {
+      outError('enable_experimental_skills is not true — skills will not load');
+      verifyFailed = true;
+    }
+
+    if (config.autoupdate === false) {
+      outOk('autoupdate is false');
+    } else {
+      outWarn('autoupdate is not false — update may overwrite config');
     }
   }
 
