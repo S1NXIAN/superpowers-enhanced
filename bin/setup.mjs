@@ -26,7 +26,7 @@ let backupDir = null;
 function showHelp() {
   console.log(`${c(BOLD, 'opencode-zeus \u2014 config installer')}\n`);
   console.log(`${c(DIM, 'Installs a Superpowers-optimized OpenCode configuration.')}\n`);
-  console.log(`${c(BOLD, 'Usage:')}  node setup.mjs [OPTIONS]\n`);
+  console.log(`${c(BOLD, 'Usage:')}  node bin/setup.mjs [OPTIONS]\n`);
   console.log(`${c(BOLD, 'Options:')}`);
   console.log('  --force       Non-interactive; overwrite without prompting');
   console.log('  --dry-run     Show what would change; don\'t touch anything');

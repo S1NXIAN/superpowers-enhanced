@@ -3,7 +3,7 @@
 # opencode-zeus — one-liner uninstaller (Bash)
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/uninstall.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/uninstall.sh)
 #
 # What it does:
 #   1. Checks Node.js is available
@@ -103,7 +103,7 @@ if [[ ! -d "$EXTRACTED" ]]; then
   EXTRACTED="$(find "$TMPDIR" -mindepth 1 -maxdepth 1 -type d -name "opencode-zeus*" | head -1)"
 fi
 if [[ ! -f "${EXTRACTED}/bin/uninstall.mjs" ]]; then
-  fail "uninstall.mjs not found in downloaded archive."
+  fail "bin/uninstall.mjs not found in downloaded archive."
   exit 1
 fi
 ok "Extracted to temp directory"

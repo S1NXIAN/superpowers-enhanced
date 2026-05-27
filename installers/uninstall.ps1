@@ -2,7 +2,7 @@
 # opencode-zeus — one-liner uninstaller (PowerShell)
 #
 # Usage:
-#   irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/uninstall.ps1 | iex
+#   irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/uninstall.ps1 | iex
 #
 # What it does:
 #   1. Checks Node.js is available
@@ -60,7 +60,7 @@ try {
         $Extracted = Get-ChildItem -Path $TmpDir -Directory | Where-Object { $_.Name -like "opencode-zeus*" } | Select-Object -First 1 -ExpandProperty FullName
     }
     if (-not (Test-Path (Join-Path $Extracted "bin/uninstall.mjs"))) {
-        Write-Fail "uninstall.mjs not found in downloaded archive."
+        Write-Fail "bin/uninstall.mjs not found in downloaded archive."
         exit 1
     }
     Write-Ok "Extracted to temp directory"

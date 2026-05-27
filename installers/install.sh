@@ -3,7 +3,7 @@
 # opencode-zeus — one-liner installer
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/install.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/install.sh)
 #
 # What it does:
 #   1. Detects OS and installs Node.js if missing
@@ -278,7 +278,7 @@ if [[ ! -d "$EXTRACTED" ]]; then
 fi
 
 if [[ ! -f "${EXTRACTED}/bin/setup.mjs" ]]; then
-  fail "setup.mjs not found in downloaded archive."
+  fail "bin/setup.mjs not found in downloaded archive."
   exit 1
 fi
 

@@ -8,24 +8,24 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_DIR = join(__dirname, '..', '..');
 
 describe('CLI Integration', () => {
-  it('setup.mjs --help executes without error', () => {
+  it('bin/setup.mjs --help executes without error', () => {
     const out = execSync('node bin/setup.mjs --help', { cwd: REPO_DIR, encoding: 'utf8' });
-    assert.ok(out.includes('Superpowers Enhanced'));
+    assert.ok(out.includes('opencode-zeus'));
     assert.ok(out.includes('Usage:'));
   });
 
-  it('setup.mjs --dry-run executes without error', () => {
+  it('bin/setup.mjs --dry-run executes without error', () => {
     const out = execSync('node bin/setup.mjs --dry-run', { cwd: REPO_DIR, encoding: 'utf8' });
     assert.ok(out.includes('Dry run complete.'));
   });
 
-  it('uninstall.mjs --help executes without error', () => {
+  it('bin/uninstall.mjs --help executes without error', () => {
     const out = execSync('node bin/uninstall.mjs --help', { cwd: REPO_DIR, encoding: 'utf8' });
-    assert.ok(out.includes('Superpowers Enhanced'));
+    assert.ok(out.includes('opencode-zeus'));
     assert.ok(out.includes('Usage:'));
   });
 
-  it('uninstall.mjs --dry-run executes without error', () => {
+  it('bin/uninstall.mjs --dry-run executes without error', () => {
     const out = execSync('node bin/uninstall.mjs --dry-run', { cwd: REPO_DIR, encoding: 'utf8' });
     assert.ok(out.includes('Dry run complete.'));
   });

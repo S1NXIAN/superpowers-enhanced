@@ -22,8 +22,8 @@ let dryRunMode = false;
 
 function showHelp() {
   console.log(`${c(BOLD, 'opencode-zeus \u2014 config uninstaller')}\n`);
-  console.log(`${c(DIM, 'Reverses the changes made by setup.mjs and restores files from backup.')}\n`);
-  console.log(`${c(BOLD, 'Usage:')}  node uninstall.mjs [OPTIONS]\n`);
+  console.log(`${c(DIM, 'Reverses the changes made by bin/setup.mjs and restores files from backup.')}\n`);
+  console.log(`${c(BOLD, 'Usage:')}  node bin/uninstall.mjs [OPTIONS]\n`);
   console.log(`${c(BOLD, 'Options:')}`);
   console.log('  --force       Non-interactive; skip confirmation prompt');
   console.log('  --dry-run     Show what would change; don\'t touch anything');

@@ -2,7 +2,7 @@
 # opencode-zeus — one-liner installer (Windows PowerShell)
 #
 # Usage:
-#   irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/install.ps1 | iex
 #
 # What it does:
 #   1. Checks for Node.js (installs via winget/choco/scoop if missing)
@@ -126,7 +126,7 @@ if (-not (Test-Path (Join-Path $Extracted "bin/setup.mjs"))) {
 }
 
 if (-not (Test-Path (Join-Path $Extracted "bin/setup.mjs"))) {
-    Write-Fail "setup.mjs not found in downloaded archive."
+    Write-Fail "bin/setup.mjs not found in downloaded archive."
     exit 1
 }
 
