@@ -21,7 +21,7 @@ let forceMode = false;
 let dryRunMode = false;
 
 function showHelp() {
-  console.log(`${c(BOLD, 'Superpowers Enhanced \u2014 config uninstaller')}\n`);
+  console.log(`${c(BOLD, 'opencode-zeus \u2014 config uninstaller')}\n`);
   console.log(`${c(DIM, 'Reverses the changes made by setup.mjs and restores files from backup.')}\n`);
   console.log(`${c(BOLD, 'Usage:')}  node uninstall.mjs [OPTIONS]\n`);
   console.log(`${c(BOLD, 'Options:')}`);
@@ -260,8 +260,8 @@ function verify(restoredPaths = []) {
     else con.outOk('AGENTS.md removed from instructions');
 
     const skillsPaths = config.skills?.paths || [];
-    if (skillsPaths.includes(SKILLS_PATH)) { con.outError('skills.paths still includes skills/superpowers-enhanced'); verifyFailed = true; }
-    else con.outOk('skills/superpowers-enhanced removed from skills.paths');
+    if (skillsPaths.includes(SKILLS_PATH)) { con.outError('skills.paths still includes skills/opencode-zeus'); verifyFailed = true; }
+    else con.outOk('skills/opencode-zeus removed from skills.paths');
 
     if (config.autoupdate === false) con.outWarn('autoupdate still false (left as-is, no harm)');
   } else {
@@ -294,7 +294,7 @@ function verify(restoredPaths = []) {
 async function main() {
   parseArgs();
   console.log('');
-  con.outHeader('Superpowers Enhanced \u2014 config uninstaller');
+  con.outHeader('opencode-zeus \u2014 config uninstaller');
   con.outSubdued(`Repo: ${REPO_DIR}`);
   con.outSubdued(`Config: ${CONFIG_DIR}\n`);
 

@@ -3,7 +3,7 @@
 # Superpowers Enhanced — one-liner installer
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/install.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/install.sh)
 #
 # What it does:
 #   1. Detects OS and installs Node.js if missing
@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-REPO="S1NXIAN/superpowers-enhanced"
+REPO="S1NXIAN/opencode-zeus"
 BRANCH="main"
 TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 NODE_VERSION_FALLBACK="v22.16.0"
@@ -271,7 +271,7 @@ ok "Downloaded tarball"
 
 # Extract — GitHub tarballs have a top-level directory named <repo>-<branch>/
 tar -xzf "$TARBALL" -C "$TMPDIR"
-EXTRACTED="${TMPDIR}/superpowers-enhanced-${BRANCH}"
+EXTRACTED="${TMPDIR}/opencode-zeus-${BRANCH}"
 
 if [[ ! -d "$EXTRACTED" ]]; then
   EXTRACTED="$(find "$TMPDIR" -mindepth 1 -maxdepth 1 -type d -name "superpowers*" | head -1)"

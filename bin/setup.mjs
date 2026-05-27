@@ -24,7 +24,7 @@ let dryRunMode = false;
 let backupDir = null;
 
 function showHelp() {
-  console.log(`${c(BOLD, 'Superpowers Enhanced \u2014 config installer')}\n`);
+  console.log(`${c(BOLD, 'opencode-zeus \u2014 config installer')}\n`);
   console.log(`${c(DIM, 'Installs a Superpowers-optimized OpenCode configuration.')}\n`);
   console.log(`${c(BOLD, 'Usage:')}  node setup.mjs [OPTIONS]\n`);
   console.log(`${c(BOLD, 'Options:')}`);
@@ -274,8 +274,8 @@ function verify() {
     else { con.outError('AGENTS.md missing from instructions'); verifyFailed = true; }
 
     const skillsPaths = config.skills?.paths || [];
-    if (skillsPaths.includes(SKILLS_PATH)) con.outOk('skills.paths includes skills/superpowers-enhanced');
-    else { con.outError('skills.paths missing skills/superpowers-enhanced'); verifyFailed = true; }
+    if (skillsPaths.includes(SKILLS_PATH)) con.outOk('skills.paths includes skills/opencode-zeus');
+    else { con.outError('skills.paths missing skills/opencode-zeus'); verifyFailed = true; }
 
     if (config.autoupdate === false) con.outOk('autoupdate is false');
     else con.outWarn('autoupdate is not false — update may overwrite config');
@@ -301,7 +301,7 @@ function verify() {
 async function main() {
   parseArgs();
   console.log('');
-  con.outHeader('Superpowers Enhanced \u2014 config installer');
+  con.outHeader('opencode-zeus \u2014 config installer');
   con.outSubdued(`Repo: ${REPO_DIR}`);
   con.outSubdued(`Config: ${CONFIG_DIR}\n`);
 

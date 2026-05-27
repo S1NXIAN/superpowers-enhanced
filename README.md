@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# ⚡ Superpowers Enhanced
+# ⚡ opencode-zeus
 *A high-discipline engineering pipeline and quality gate overlay for OpenCode*
 
 [![Node version](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
@@ -20,11 +20,11 @@
 
 OpenCode agents default to an implementation-first mode: describe what you want, and they immediately begin writing code. While fast, this ad-hoc approach often leads to regressive bugs, missed security boundaries, and architectural debt.
 
-**Superpowers Enhanced** acts as a structured quality gate overlay on top of OpenCode. It wraps your agentic environment in a strict engineering pipeline—enforcing design, security auditing, multi-perspective reviews, and automated verification.
+**opencode-zeus** acts as a structured quality gate overlay on top of OpenCode. It wraps your agentic environment in a strict engineering pipeline—enforcing design, security auditing, multi-perspective reviews, and automated verification.
 
 ### Value Proposition
 
-| Task | Default OpenCode | Superpowers Enhanced |
+| Task | Default OpenCode | opencode-zeus |
 | :--- | :--- | :--- |
 | **Task Initiation** | Jump straight to implementation | **Brainstorm** intent, propose approaches, design first |
 | **Security Auditing** | Manual oversight or post-factum scans | **Hard-coded triage** triggered automatically on file paths/content |
@@ -57,10 +57,10 @@ OpenCode agents default to an implementation-first mode: describe what you want,
 
 ```bash
 # Linux / macOS / WSL
-bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/install.sh)
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/install.ps1 | iex
+irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/install.ps1 | iex
 ```
 
 Once installed, restart your OpenCode session and try initiating a task:
@@ -71,8 +71,8 @@ Once installed, restart your OpenCode session and try initiating a task:
 If you prefer to inspect and run the installation locally:
 
 ```bash
-git clone https://github.com/S1NXIAN/superpowers-enhanced.git ~/superpowers-enhanced
-cd ~/superpowers-enhanced
+git clone https://github.com/S1NXIAN/opencode-zeus.git ~/opencode-zeus
+cd ~/opencode-zeus
 
 node bin/setup.mjs            # Interactive setup
 node bin/setup.mjs --force    # Non-interactive, skip prompts
@@ -129,7 +129,7 @@ You can explicitly bypass the heuristic routing at any time:
 
 ## The Six Quality Gates
 
-Superpowers Enhanced integrates six key protocols directly into the agentic loop.
+opencode-zeus integrates six key protocols directly into the agentic loop.
 
 ```text
        [Deliberation Gate] — before architecture for complex tasks
@@ -208,7 +208,7 @@ Forces multi-path validation during debugging and verification to prevent confid
 ## Project Structure
 
 ```text
-superpowers-enhanced/
+opencode-zeus/
 ├── AGENTS.md                 # User instructions (highest priority rulebook)
 ├── templates/
 │   └── opencode-template.json    # Base OpenCode config template
@@ -254,7 +254,7 @@ If you experience crashes immediately on startup:
 
 ### Skills or Agents Not Loading
 
-1. Verify that `skills.paths` in your global `opencode.json` contains the path to the skills directory (typically `"skills/superpowers-enhanced"` or absolute path to the skills folder).
+1. Verify that `skills.paths` in your global `opencode.json` contains the path to the skills directory (typically `"skills/opencode-zeus"` or absolute path to the skills folder).
 2. Verify that the skill files actually exist at that location.
 3. Check that the `instructions` array contains `"AGENTS.md"`.
 4. Restart the OpenCode application/daemon—skills, agents, and instructions are loaded into memory *only* during boot.
@@ -265,10 +265,10 @@ To clean up all registered directories and restore your original `opencode.json`
 
 ```bash
 # Unix (Linux / macOS / WSL)
-bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/uninstall.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/uninstall.sh)
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/uninstall.ps1 | iex
+irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/uninstall.ps1 | iex
 ```
 
 Local/manual cleanup:

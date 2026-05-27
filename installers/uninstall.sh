@@ -3,7 +3,7 @@
 # Superpowers Enhanced — one-liner uninstaller (Bash)
 #
 # Usage:
-#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/uninstall.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/uninstall.sh)
 #
 # What it does:
 #   1. Checks Node.js is available
@@ -14,7 +14,7 @@
 
 set -euo pipefail
 
-REPO="S1NXIAN/superpowers-enhanced"
+REPO="S1NXIAN/opencode-zeus"
 BRANCH="main"
 TARBALL_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz"
 
@@ -98,7 +98,7 @@ ok "Downloaded tarball"
 
 # Extract
 tar -xzf "$TARBALL" -C "$TMPDIR"
-EXTRACTED="${TMPDIR}/superpowers-enhanced-${BRANCH}"
+EXTRACTED="${TMPDIR}/opencode-zeus-${BRANCH}"
 if [[ ! -d "$EXTRACTED" ]]; then
   EXTRACTED="$(find "$TMPDIR" -mindepth 1 -maxdepth 1 -type d -name "superpowers*" | head -1)"
 fi

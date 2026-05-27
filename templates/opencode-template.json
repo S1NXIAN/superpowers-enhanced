@@ -16,6 +16,6 @@
   "default_agent": "zeus",
   "instructions": ["AGENTS.md"],
   "skills": {
-    "paths": ["skills/superpowers-enhanced"]
+    "paths": ["skills/opencode-zeus"]
   }
 }

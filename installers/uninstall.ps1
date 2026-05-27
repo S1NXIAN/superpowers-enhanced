@@ -2,7 +2,7 @@
 # Superpowers Enhanced — one-liner uninstaller (PowerShell)
 #
 # Usage:
-#   irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/uninstall.ps1 | iex
+#   irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/uninstall.ps1 | iex
 #
 # What it does:
 #   1. Checks Node.js is available
@@ -13,7 +13,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$Repo = "S1NXIAN/superpowers-enhanced"
+$Repo = "S1NXIAN/opencode-zeus"
 $Branch = "main"
 $ZipUrl = "https://github.com/$Repo/archive/refs/heads/$Branch.zip"
 
@@ -55,7 +55,7 @@ try {
 
     # Extract
     Expand-Archive -Path $ZipPath -DestinationPath $TmpDir -Force
-    $Extracted = Join-Path $TmpDir "superpowers-enhanced-$Branch"
+    $Extracted = Join-Path $TmpDir "opencode-zeus-$Branch"
     if (-not (Test-Path (Join-Path $Extracted "uninstall.mjs"))) {
         $Extracted = Get-ChildItem -Path $TmpDir -Directory | Where-Object { $_.Name -like "superpowers*" } | Select-Object -First 1 -ExpandProperty FullName
     }

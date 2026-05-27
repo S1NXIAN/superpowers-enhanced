@@ -2,7 +2,7 @@
 # Superpowers Enhanced — one-liner installer (Windows PowerShell)
 #
 # Usage:
-#   irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/install.ps1 | iex
 #
 # What it does:
 #   1. Checks for Node.js (installs via winget/choco/scoop if missing)
@@ -13,7 +13,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$Repo = "S1NXIAN/superpowers-enhanced"
+$Repo = "S1NXIAN/opencode-zeus"
 $Branch = "main"
 $ZipUrl = "https://github.com/$Repo/archive/refs/heads/$Branch.zip"
 
@@ -118,7 +118,7 @@ Invoke-WebRequest -Uri $ZipUrl -OutFile $ZipPath -UseBasicParsing
 Write-Ok "Downloaded zip"
 
 Expand-Archive -Path $ZipPath -DestinationPath $TmpDir -Force
-$Extracted = Join-Path $TmpDir "superpowers-enhanced-$Branch"
+$Extracted = Join-Path $TmpDir "opencode-zeus-$Branch"
 
 if (-not (Test-Path (Join-Path $Extracted "setup.mjs"))) {
     # Fallback: find extracted directory
