@@ -6,8 +6,8 @@
 *A high-discipline engineering pipeline and quality gate overlay for OpenCode*
 
 [![Node version](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Install - Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](install.sh)
-[![Install - PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white)](install.ps1)
+[![Install - Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)](installers/install.sh)
+[![Install - PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white)](installers/install.ps1)
 [![License - MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
 ⭐ If you find this configuration helpful, star the repository!
@@ -57,10 +57,10 @@ OpenCode agents default to an implementation-first mode: describe what you want,
 
 ```bash
 # Linux / macOS / WSL
-bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/install.sh)
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/install.ps1 | iex
 ```
 
 Once installed, restart your OpenCode session and try initiating a task:
@@ -74,9 +74,9 @@ If you prefer to inspect and run the installation locally:
 git clone https://github.com/S1NXIAN/superpowers-enhanced.git ~/superpowers-enhanced
 cd ~/superpowers-enhanced
 
-node setup.mjs            # Interactive setup
-node setup.mjs --force    # Non-interactive, skip prompts
-node setup.mjs --dry-run  # Preview config and file changes only
+node bin/setup.mjs            # Interactive setup
+node bin/setup.mjs --force    # Non-interactive, skip prompts
+node bin/setup.mjs --dry-run  # Preview config and file changes only
 ```
 
 > [!IMPORTANT]
@@ -210,13 +210,16 @@ Forces multi-path validation during debugging and verification to prevent confid
 ```text
 superpowers-enhanced/
 ├── AGENTS.md                 # User instructions (highest priority rulebook)
-├── opencode-template.json    # Base OpenCode config template
-├── install.sh                # Unix installation entrypoint
-├── install.ps1               # Windows PowerShell installation entrypoint
-├── setup.mjs                 # Cross-platform JSON-merge configuration setup
-├── uninstall.sh              # Unix uninstallation cleanup script
-├── uninstall.ps1             # Windows uninstallation cleanup script
-├── uninstall.mjs             # Cross-platform configuration restorer
+├── templates/
+│   └── opencode-template.json    # Base OpenCode config template
+├── installers/
+│   ├── install.sh                # Unix installation entrypoint
+│   ├── install.ps1               # Windows PowerShell installation entrypoint
+├── bin/
+│   ├── setup.mjs                 # Cross-platform JSON-merge configuration setup
+│   ├── uninstall.sh              # Unix uninstallation cleanup script
+│   └── uninstall.ps1             # Windows uninstallation cleanup script
+│   └── uninstall.mjs             # Cross-platform configuration restorer
 ├── agent/
 │   └── zeus.md               # Zeus Orchestrator (default agent)
 ├── prompts/
@@ -262,15 +265,15 @@ To clean up all registered directories and restore your original `opencode.json`
 
 ```bash
 # Unix (Linux / macOS / WSL)
-bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/uninstall.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/uninstall.sh)
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/uninstall.ps1 | iex
+irm https://raw.githubusercontent.com/S1NXIAN/superpowers-enhanced/main/installers/uninstall.ps1 | iex
 ```
 
 Local/manual cleanup:
 ```bash
-node uninstall.mjs
+node bin/uninstall.mjs
 ```
 
 ([back to top](#readme-top))
