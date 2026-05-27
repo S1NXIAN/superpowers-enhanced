@@ -29,6 +29,11 @@ do NOT re-check it. Focus only on:
 4. **Naming clarity** — names communicate intent, no abbreviations
 5. **Duplication** — no repeated logic that should be extracted
 6. **Security** — no command injection, path traversal, hardcoded secrets, unsafe eval
+7. **Adversarial posture** — Assume the role of an attacker reviewing this code.
+   - What inputs would break this? Try empty/null/malicious values at every entry point.
+   - Can you bypass auth/authorization checks by calling functions in an unexpected order?
+   - Are there TOCTOU races between a permission check and the operation it guards?
+   - Would this code handle a malicious insider (valid credentials, malicious intent)?
 
 ### Severity levels
 
