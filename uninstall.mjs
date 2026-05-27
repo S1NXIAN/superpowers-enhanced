@@ -411,9 +411,10 @@ function copyDirRecursive(src, dest) {
   }
 }
 
-function verify() {
+function verify(restoredPaths = []) {
   outHeader('Verification');
   let verifyFailed = false;
+  const restoredSet = new Set(restoredPaths);
 
   const config = existsSync(CONFIG_JSON_PATH) ? readJson(CONFIG_JSON_PATH) : null;
   if (config) {
@@ -466,8 +467,12 @@ function verify() {
   for (const rel of MANAGED_FILES) {
     const dest = join(CONFIG_DIR, rel);
     if (existsSync(dest)) {
-      outError(`File still exists: ${rel}`);
-      verifyFailed = true;
+      if (restoredSet.has(rel)) {
+        outOk(`File restored: ${rel} (from backup)`);
+      } else {
+        outError(`File still exists: ${rel}`);
+        verifyFailed = true;
+      }
     } else {
       outOk(`File removed: ${rel}`);
     }
@@ -476,8 +481,12 @@ function verify() {
   for (const rel of MANAGED_DIRS) {
     const dest = join(CONFIG_DIR, rel);
     if (existsSync(dest)) {
-      outError(`Directory still exists: ${rel}/`);
-      verifyFailed = true;
+      if (restoredSet.has(rel)) {
+        outOk(`Directory restored: ${rel}/ (from backup)`);
+      } else {
+        outError(`Directory still exists: ${rel}/`);
+        verifyFailed = true;
+      }
     } else {
       outOk(`Directory removed: ${rel}/`);
     }
@@ -543,7 +552,12 @@ async function main() {
     restoreFromBackup(restores);
   }
 
-  const verified = verify();
+  // Collect paths that were restored — verification should not flag these
+  const restoredPaths = restores
+    .filter(r => r.type === 'file' || r.type === 'dir')
+    .map(r => r.configRel);
+
+  const verified = verify(restoredPaths);
 
   console.log('');
   if (verified) {
