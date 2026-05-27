@@ -188,9 +188,36 @@ consequence-aware framing into their prompts:
 The `social-accountability` skill contains the full framing templates.
 The `prompts/` directory contains pre-framed sub-agent prompt templates.
 
+### 12. Self-Consistency Reasoning — Multi-Path Validation
+
+When debugging complex issues or verifying completion claims, multi-path reasoning prevents
+confident-but-wrong single-chain failures:
+
+**During debugging (overrides systematic-debugging Phase 3):**
+- Before committing to a root cause hypothesis, generate 3-5 independent explanations
+  for the observed failure.
+- Each path must use a DIFFERENT reasoning approach (e.g., trace data flow, check recent
+  changes, compare against working examples, review assumptions, consider environmental factors).
+- If ≥60% of paths agree on root cause → proceed with high confidence.
+- If paths diverge (<60% agreement) → confidence is low. Do NOT fix. Gather more evidence
+  (additional logging, minimal reproduction, isolation test).
+
+**During verification (overrides verification-before-completion):**
+- Before claiming completion, generate 2-3 independent checks that the fix actually resolves
+  the issue.
+- Each check must test the claim from a DIFFERENT angle (e.g., run the failing test,
+  review diff for side effects, verify edge cases, check for similar patterns elsewhere).
+- If checks disagree → do NOT claim completion. Reopen investigation.
+
+**Token-cost discipline:**
+- Only activate multi-path reasoning when the problem is genuinely complex (non-trivial
+  debugging, security-critical changes, architectural decisions).
+- For simple issues (typos, obvious bugs, straightforward config changes) — skip it.
+  Single-path reasoning is sufficient.
+
 ### Integration
 
-These five protocols integrate with the standard Superpowers workflow:
+These six protocols integrate with the standard Superpowers workflow:
 
 ```
 [Deliberation Gate] — before blueprint for tier-3 tasks
@@ -207,6 +234,7 @@ These five protocols integrate with the standard Superpowers workflow:
          ↓
     [ASI Loop] — when multiple issues found in reviews
     [Ephemeral Hashing] — for security-critical patches
+    [Self-Consistency] — multi-path validation during debugging & verification
          ↓
   finishing-a-development-branch → merge/PR/cleanup
 ```
