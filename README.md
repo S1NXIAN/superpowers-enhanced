@@ -70,7 +70,7 @@ Everything else — git, curl, wget, PowerShell — is detected and used if avai
 
 | What | Purpose |
 |---|---|
-| **Zeus agent** (`agent/zeus.md`) | Orchestrator set as default — plans, delegates, reviews. Never writes code directly. |
+| **Zeus agent** (`agent/zeus.md`) | Adaptive orchestrator. Runs full Superpowers pipeline for complex tasks; takes fast path (TDD directly) for simple ones. `@quick`/`@full` annotations override auto-detection. Security triggers (T1-T3) always force the full path. |
 | **Instruction hierarchy** (`AGENTS.md`) | Highest-priority rules that force the agent to follow the workflow. Outranks the system prompt. |
 | **Security triage** (`skills/security-triage/`) | Hard-coded trigger rules. Any file matching `*auth*/**`, `*secret*/**`, `*token*/**`, etc. automatically triggers a full audit. Not a judgment call. |
 | **ASI loop** (`skills/asi-loop/`) | When a scan finds multiple issues, fixes them one at a time with TDD and re-testing between each. Prevents batch-fix regressions. |
@@ -128,7 +128,12 @@ When OpenCode starts with this configuration:
 3. The **Zeus agent** is set as default, giving every session an orchestrator mindset.
 4. **Enhanced skills** are registered via `skills.paths`, making them available for the orchestrator to invoke.
 
-The result is an agent that:
+The result is an agent that **adapts to task complexity**:
+
+- **Simple tasks** (≤2 files, single concern, no security risk): fast path — TDD directly, no brainstorming or sub-agent overhead
+- **Complex tasks** (new features, cross-cutting, security-relevant): runs the full Superpowers pipeline below
+
+On the full pipeline:
 
 - Runs **security triage** before every task (pattern matching, not judgment)
 - **Brainstorms** before building (explores intent, proposes approaches)
@@ -139,6 +144,8 @@ The result is an agent that:
 - Verifies file integrity with **SHA-256 hashing** for security-critical work
 - Reviews **spec compliance then code quality** between tasks
 - Never claims completion without **fresh verification evidence**
+
+Use `@quick` to force fast path or `@full` to force full pipeline on any task.
 
 ## Project Structure
 
@@ -153,7 +160,10 @@ superpowers-enhanced/
 ├── uninstall.ps1             # One-liner uninstaller (PowerShell)
 ├── uninstall.mjs             # Cross-platform uninstaller
 ├── agent/
-│   └── zeus.md               # Orchestrator agent (default)
+│   └── zeus.md               # Adaptive orchestrator agent (default)
+├── tests/
+│   └── agent/
+│       └── zeus-structure.test.mjs  # Structural validation for zeus.md
 ├── prompts/
 │   ├── implementer.md
 │   ├── spec-reviewer.md
