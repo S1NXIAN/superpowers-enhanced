@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url';
 import {
   SUPERPOWERS_PLUGIN, SKILLS_PATH, CONFIG_DIR, CONFIG_JSON_PATH,
   BACKUP_PARENT, MANAGED_FILES, MANAGED_DIRS
-} from './lib/constants.mjs';
-import { createConsole } from './lib/console.mjs';
+} from '../lib/constants.mjs';
+import { createConsole } from '../lib/console.mjs';
 import {
   readJson, writeJson, removeFile, removeDir, copyDirRecursive
-} from './lib/fs-utils.mjs';
+} from '../lib/fs-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_DIR = __dirname;
+const REPO_DIR = join(__dirname, '..');
 const con = createConsole();
 const { c, BOLD, DIM, RED, GREEN, YELLOW, BLUE, RESET } = con;
 

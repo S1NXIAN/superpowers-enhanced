@@ -6,16 +6,16 @@ import { fileURLToPath } from 'node:url';
 import {
   SUPERPOWERS_PLUGIN, SKILLS_PATH, CONFIG_DIR, CONFIG_JSON_PATH,
   FILE_COPIES, DIR_COPIES
-} from './lib/constants.mjs';
-import { createConsole } from './lib/console.mjs';
+} from '../lib/constants.mjs';
+import { createConsole } from '../lib/console.mjs';
 import {
   readJson, writeJson, copyFileChecked, copyDir,
   backupFile, backupDirContent, ensureBackupDir, gitAvailable, getGitDiff
-} from './lib/fs-utils.mjs';
-import { validateConfig } from './lib/config-schema.mjs';
+} from '../lib/fs-utils.mjs';
+import { validateConfig } from '../lib/config-schema.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_DIR = __dirname;
+const REPO_DIR = join(__dirname, '..');
 const con = createConsole();
 const { c, BOLD, DIM, RED, GREEN, YELLOW, BLUE, RESET } = con;
 
