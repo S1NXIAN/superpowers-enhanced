@@ -15,7 +15,6 @@
   "autoupdate": false,
   "default_agent": "zeus",
   "instructions": ["AGENTS.md"],
-  "enable_experimental_skills": true,
   "skills": {
     "paths": ["skills/superpowers-enhanced"]
   }
