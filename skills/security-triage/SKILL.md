@@ -1,201 +1,162 @@
 ---
 name: security-triage
-description: "Use when ANY file matching security-sensitive patterns is created, modified, or reviewed. Hard-coded triage rules that bypass LLM judgment. MANDATORY triggers: auth, credentials, tokens, encryption, injection, permissions, secrets."
+description: "MANDATORY before ANY work. Pattern-match T1(paths) T2(content) T3(dirs). Must report ALL matches. Caveat: no match does NOT mean safe — see Limitations section. Cross-skill: triggers deliberation-gate override."
 ---
 
 # Security Triage — Hard-Coded Trigger Rules
 
-## The Problem
+## Core Rules
 
-LLMs are blind to security context when task descriptions don't explicitly mention it.
-A task named "Refactor user data endpoint" looks benign. The same work touches authentication
-boundaries, credential validation, and permission checks. Without hard-coded triggers,
-the agent processes it via a low-tier route and **skips the security audit entirely**.
+Every file (create/modify/delete) is checked against T1-T3; task name and intent are irrelevant. All tiers are evaluated, all matches recorded. No match does NOT mean safe — only that no hard-coded trigger fired.
 
-**This is not a judgment call. These rules are hard-coded.**
+If any trigger fires, deliberation-gate is MANDATORY (cross-skill contract) and the task is forced to Full Path.
 
----
+**Glob semantics:** `*` matches any sequence of characters including `/`. `?` matches any single character. Patterns are matched against the full relative path from project root. Examples: `auth*` matches `auth.js`, `authHelper.js`, `auth/nested/file.js`. `*.pem` matches `cert.pem`, `deep/nested/key.pem`.
 
-## Hard-Coded Triggers
+## Triggers
 
 ### T1: File Path Matches
 
-Any task that **creates, modifies, or deletes** a file matching these patterns MUST trigger
-full security triage — regardless of the task description, user intent, or perceived severity:
-
 ```
-# Authentication & Identity
-*auth*/**          *login*/**          *logout*/**
-*session*/**       *identity*/**       *sso*/**
+# Identity & Access
+auth* login* logout* session* identity* sso*
 
-# Credentials & Secrets
-*secret*/**        *credential*/**     *token*/**
-*cert*/**          *key*/**            *.pem
-*.key              *.cert              *.p12
+# Secrets & Keys
+secret* credential* token* cert* key*
+.pem .key .cert .p12 .htaccess .htpasswd .acl
 
-# Security Configuration
-*.htaccess         .htpasswd           *security*/**
-*.acl              *capability*/**     *rbac*/**
+# Security Domains
+security* rbac* crypto* cipher* encrypt*
+hash* digest* signature* tls* ssl* cors* csp* csrf* xss*
 
-# Encryption & Cryptography
-*crypto*/**        *cipher*/**         *encrypt*/**
-*hash*/**          *digest*/**         *signature*/**
+# Input & Rate Safety
+sanitize* escape* validation* rate-limit* throttle* quota*
 
-# Network Security
-*tls*/**           *ssl*/**            *cors*/**
-*csp*/**           *csrf*/**           *xss*/**
+# Deployment & Compliance
+deploy* rollback* migration* compliance* gdpr* pii*
 
-# Data Protection
-*sanitize*/**      *escape*/**         *validation*/**
-*rate-limit*/**    *throttle*/**       *quota*/**
-
-# Production Safety
-*deploy*/**        *rollback*/**       *migration*/**  (with env/prod in path)
-*audit*/**         *compliance*/**     *gdpr*/**       *pii*/**
-
-# OAuth & Federation
-*oauth*/**         *oidc*/**           *saml*/**
-*jwt*/**           *openid*/**
+# Federation
+oauth* oidc* saml* jwt* openid*
 
 # Infrastructure Security
-*firewall*/**      *proxy*/**          *vpn*/**
-*secrets-manager*/**  *vault*/**       *hsm*/**
+firewall* proxy* vpn* secrets-manager* vault* hsm*
 ```
+
+**Explicit non-matches:** The following project paths look security-adjacent but are NOT security boundaries and do NOT trigger T1: `docs/`, `tests/`, `sub-agents/`, `templates/`. Files inside these dirs are checked by T2 and T3 only.
 
 ### T2: Code Content Matches
 
-Even if the file path does NOT match T1, any file being modified that **contains** these
-patterns MUST trigger full security triage:
+**⚠️ STOP. READ `skills/security-triage/patterns/common.txt` AND `<language>.txt` NOW. Do not skip. Do not assume you know the patterns. If the files are unreachable, use the Fallback list below.**
 
+**Match rule:** case-insensitive substring match against any line of the file. A pattern like `SECRET_KEY` matches any line containing `SECRET_KEY` anywhere. Literal characters only — no regex, no glob. A match on any line triggers T2.
+
+**Pattern files:** READ `skills/security-triage/patterns/common.txt` plus the language-specific file for your project. Do not proceed without reading both. Categories covered in the files (hint only — always read the actual files):
+
+- Config keys: `SECRET_KEY`, `API_KEY`, `DATABASE_URL`, etc.
+- Security keywords: `password`, `token`, `auth`, `session`, `csrf`, etc.
+- Dangerous functions: `eval(`, `exec(`, `system(`, etc.
+- Network/file/data-flow indicators
+
+| Language | Pattern file | Language | Pattern file |
+|---|---|---|---|
+| JavaScript / TypeScript | `js-node.txt` | Python | `python.txt` |
+| Java | `java.txt` | C# (.NET) | `csharp.txt` |
+| Go | `go.txt` | Rust | `rust.txt` |
+| C | `c.txt` | C++ | `cpp.txt` |
+| PHP | `php.txt` | Ruby | `ruby.txt` |
+| Swift | `swift.txt` | Kotlin | `kotlin.txt` |
+| Dart / Flutter | `dart.txt` | Shell / Bash | `shell.txt` |
+| SQL (standalone .sql files) | `sql.txt` | Not listed | language file not needed — `common.txt` covers generic patterns |
+
+**🛡️ Fallback (use only if pattern files are unreachable):**
 ```
-# Function/class definitions touching security
-def authenticate*    class Auth*         def authorize*
-def validate_token*  def check_permission  def verify_identity*
-def encrypt*         def decrypt*        def hash_*
-def sign*            def verify_sig*     def sanitize_input*
-def escape_html*     def escape_sql*     def rate_limit*
-
-# Imports that introduce security surface
-import *crypto*      import *auth*       import *secret*
-import *security*    import *oauth*      import *jwt*
-import *saml*        import *ssl*        import *tls*
-
-# Configuration keys that control security
-SECRET_KEY          API_KEY_*           *PASSWORD*
-*TOKEN*              DATABASE_URL        REDIS_URL
-AUTH_*              SECURITY_*          ENCRYPTION_*
-CORS_*              CSP_*               CSRF_*
-SESSION_*           COOKIE_*            JWT_*
-
-# Direct security-sensitive operations
-eval(               exec(               subprocess.*
-raw_input           os.system           pickle.load
-requests.get        urllib.request       sqlite3.execute
-```
-
-### T3: Security-Adjacent Paths
-
-Any file in these directories triggers security triage regardless of the file name
-or task description:
-
-```
-auth/
-security/
-crypto/
-certs/
-secrets/
-credentials/
-permissions/
-policies/
-audit/
-compliance/
-middleware/auth*/
-middleware/security*/
-config/deploy*/
-config/secrets*/
+password secret token credential key auth session csrf
+authenticate authorize login logout sanitize escape validate
+eval( exec( system( popen( subprocess child_process
+SECRET_KEY API_KEY API_SECRET DATABASE_URL
+AUTH_ SECURITY_ ENCRYPTION_ CSP_ COOKIE_
 ```
 
-### T4: Escalation Paths
+### T3: Security-Adjacent Directories
 
-When any T1-T3 trigger fires:
+Any file in these directories triggers (filename ignored):
 
-1. **STOP** — do not proceed with the task as described
-2. **Flag** — annotate the task: `[SECURITY-TRIAGE: <trigger-type> <matched-pattern>]`
-3. **Audit** — run the full security review checklist (see below)
-4. **Escalate** — if the task involves production credentials, secrets, or auth bypass:
-   present the findings to the user with a security impact summary BEFORE proceeding
-5. **Document** — log the trigger event in the session record
+```
+auth/  security/  crypto/  certs/  secrets/  credentials/
+permissions/  policies/  compliance/  audit/
+middleware/auth*/  middleware/security*/
+config/deploy*/  config/secrets*/
+```
 
----
+## T4: Escalation Protocol
+
+When any T1-T3 fires:
+
+1. **STOP** — do not proceed.
+2. **FLAG** — `[SECURITY-TRIAGE: T1(<pattern>), T2(<pattern>), T3(<dir>)]` with file paths.
+3. **AUDIT** — run the Security Review Checklist below. Each item: `VERIFIED: file:line – evidence` or `UNVERIFIABLE: what test would confirm`.
+4. **ESCALATE** — if any match involves a production path (contains `/prod/`, `/production/`, `PROD_` env var, `deploy/prod/`, or `prod/` dir), present a security impact summary to the user before proceeding.
+5. **DOCUMENT** — record all matches and audit results. Then output:
+
+```
+[SECURITY-TRIAGE REPORT]
+Matches: <list with file paths and patterns>
+Audit: <each checklist item as VERIFIED:evidence or UNVERIFIABLE:reason>
+Escalation: <impact summary or "none">
+Bias Check: <confirm all files re-checked; "clean" ≠ "safe">
+```
 
 ## Security Review Checklist
 
-When security triage is triggered, the following checks are MANDATORY:
+For each item: `VERIFIED: file:line – what confirmed` or `UNVERIFIABLE: what test would be needed`.
 
-### Code Review
+### Code
+- [ ] Output encoding at trust boundaries
+- [ ] Session rotation, expiry, httpOnly
+- [ ] CSRF protection on state-changing routes
+- [ ] AuthZ checks at every protected handler
+- [ ] No secrets in code/comments/logs (grep)
+- [ ] Parameterized queries at untrusted inputs
+- [ ] Rate limiting on auth-sensitive endpoints
+- [ ] Secrets rotation path (UNVERIFIABLE)
+- [ ] Adversarial test coverage (UNVERIFIABLE)
 
-- [ ] Output encoding/escaping applied at all trust boundaries
-- [ ] Session management follows secure patterns (rotation, expiry, httpOnly)
-- [ ] CSRF protection on state-changing operations
-- [ ] Authentication/Authorization — verify auth checks at every protected boundary, test for privilege escalation
-- [ ] Secrets exposure — no secrets in code, comments, git history, or logs; must be externalized to env vars or vault
-- [ ] Injection defense — SQL/command/NoSQL injection at every untrusted input boundary; parameterized queries required
-- [ ] Rate limiting/throttling on sensitive endpoints (brute force protection)
+### Dependencies
+- [ ] No known-vulnerable deps introduced
+- [ ] Versions pinned (no ^/~ ranges)
+- [ ] Supply-chain vetting (UNVERIFIABLE)
 
-### Dependency Review
+### Config
+- [ ] CORS explicit origins (not `*`)
+- [ ] TLS ≥ 1.2
+- [ ] Security headers: CSP, HSTS, X-Frame-Options
+- [ ] Debug/dev mode disabled
+- [ ] Error responses don't leak internals
 
-- [ ] No known-vulnerable dependencies introduced
-- [ ] Dependency versions are pinned (not floating ranges)
-- [ ] New dependencies vetted for supply-chain risk (source, maintenance, license)
+### How to verify
+- **VERIFIABLE:** read the relevant code path, confirm the control is present and correctly configured.
+- **UNVERIFIABLE:** describe what integration or adversarial test would be required.
 
-### Configuration Review
+## Limitations
 
-- [ ] CORS configured with explicit origins (not wildcard)
-- [ ] TLS/SSL configuration meets current standards
-- [ ] Security headers set (CSP, HSTS, X-Frame-Options, etc.)
-- [ ] Debug/development mode disabled in production paths
-- [ ] Error messages do not leak internal state
+Pattern matching is incomplete — a non-matching file can still be a security boundary. **Scrutinize every new file that creates data flow, input handling, or external communication:** route handlers, DB/API wrappers, configs that may hold secrets, auth/parsing/serialization middleware. If in doubt, run the full audit.
 
-### Testing Review
+## Bias Compensation
 
-- [ ] Rate limiting behavior is verified
-- [ ] Secrets rotation/replacement is tested
-- [ ] Adversarial test cases — negative tests cover auth bypass, injection attempts, privilege escalation, boundary overflow
+Re-check every file you read (not just modified), list all matches (don't anchor on the first), and remember "clean" means no vulnerability found, not "safe."
 
----
-
-## Trigger Flow
-
+## Trigger Check Procedure (execute in this order)
 ```
-Task received
-  ↓
-Check file paths against T1 (hard-coded pattern match)
-  ├─ Match → [SECURITY-TRIAGE: T1 match] → Full security audit
-  └─ No match
-       ↓
-  Check file contents against T2 (existing code patterns)
-  ├─ Match → [SECURITY-TRIAGE: T2 match] → Full security audit
-  └─ No match
-       ↓
-  Check directory against T3 (security-adjacent paths)
-  ├─ Match → [SECURITY-TRIAGE: T3 match] → Full security audit
-  └─ No match
-       ↓
-  Check task description for security keywords
-  ├─ Match → [SECURITY-TRIAGE: keyword match] → Full security audit
-  └─ No match
-       ↓
-  Continue with normal workflow
+0. Read pattern files: skills/security-triage/patterns/common.txt + <language>.txt
+1. Collect all files in the task (create/modify/delete)
+2. For EACH file:
+   a. Match path against T1 patterns → if match, record T1(<pattern>)
+   b. Read file content → match against T2 patterns → if match, record T2(<pattern>)
+   c. Match directory against T3 → if match, record T3(<dir>)
+3. If ANY file has ANY match:
+   → Execute T4 Escalation Protocol
+4. If NO file has ANY match:
+   → Check the Limitations section's "What to do about it" guidance for new files
+   → If any file qualifies, run audit anyway
+   → If no file qualifies, proceed normally
 ```
-
----
-
-## Red Flags
-
-| Pattern | Why It's Wrong |
-|---------|----------------|
-| "This file doesn't look security-related" | **Pattern matching overrides judgment.** Always match against T1-T3. |
-| "The task name is just 'refactor data'" | **Triggers fire on paths and content, not task names.** |
-| "I've seen this file before, it's fine" | **Every modification is a new security boundary.** Re-check. |
-| "Skipping triage saves time" | **A missed security review costs orders of magnitude more than the review itself.** |
-| "I'll note it but not escalate" | **Escalation is hard-coded.** If it matches T4 criteria, you escalate. |

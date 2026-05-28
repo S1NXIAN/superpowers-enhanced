@@ -236,7 +236,7 @@ No changes required. Same reasoning — `setup.mjs` stays at root.
 ### Unchanged Files
 - `AGENTS.md`, `agent/zeus.md`, `scripts/verify-hash.sh` — No changes
 - `install.sh`, `install.ps1`, `uninstall.sh`, `uninstall.ps1` — No changes
-- `prompts/*`, `skills/*` — No changes
+- `sub-agents/*`, `skills/*` — No changes
 - `opencode-template.json` — No changes
 
 ## 8. Formatting & Design Rules

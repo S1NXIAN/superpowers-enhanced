@@ -1,0 +1,85 @@
+# Shell/Bash security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+eval
+exec
+source
+. .
+$((
+$(
+` # backtick command substitution
+curl
+wget
+ssh
+scp
+sftp
+rsync
+sudo
+su -
+su
+chmod 777
+chmod 666
+chmod a+w
+chmod a+x
+chmod -R
+chown -R
+umask 000
+umask 0
+passwd
+openssl
+gpg --decrypt
+gpg --encrypt
+gpg -d
+gpg -e
+tar -czf
+tar -xzf
+mkfifo
+mknod
+setuid
+setgid
+trap
+rm -rf
+rm -r
+rm --recursive
+dd if=
+dd of=
+iptables
+ufw
+systemctl enable
+systemctl start
+systemctl stop
+journalctl -u
+auditd
+logrotate
+export SECRET
+export TOKEN
+export API_KEY
+export PASSWORD
+export AWS
+export GITHUB_TOKEN
+export DB_PASSWORD
+printf '%s' "$password"
+read -s
+read -sp
+read password
+read -r password
+HISTFILE
+HISTCONTROL
+HISTSIZE
+shopt -s histappend
+shopt -s histverify
+alias sudo
+alias rm
+alias mv
+alias cp
+unalias
+chroot
+nsenter
+unshare
+capsh
+setcap
+getcap
+apparmor
+selinux
+sestatus
+getenforce
+setenforce

@@ -1,0 +1,66 @@
+# Ruby security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+# Code injection
+Kernel.eval
+eval(
+instance_eval
+class_eval
+module_eval
+# Deserialization
+YAML.load
+YAML.unsafe_load
+Marshal.load
+Marshal.restore
+# SQL injection
+execute(
+query(
+raw_connection
+sanitize_sql
+# Command injection
+system(
+exec(
+spawn(
+`
+%x(
+Open3
+IO.popen
+# Authentication / Auth bypass
+authenticate!
+authenticate
+authenticate_user!
+authorize
+authorize!
+has_secure_password
+has_secure_token
+devise
+cancancan
+pundit
+# HTTP / API
+Net::HTTP
+HTTParty
+RestClient
+Faraday
+# Secrets / config
+Rails.application.secrets
+Rails.application.credentials
+ENV
+# File operations
+File.read
+File.write
+File.open
+Dir.glob
+Dir.entries
+Pathname
+# Rendering / output
+render text:
+render json:
+render xml:
+send_data
+send_file
+# Mass assignment
+params.permit!
+attr_accessible
+accepts_nested_attributes_for
+# Redirect open
+redirect_to
+redirect_back

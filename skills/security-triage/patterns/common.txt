@@ -1,0 +1,50 @@
+# Common security patterns — always loaded regardless of project language
+# Case-insensitive substring match — one pattern per line
+# Covers config keys, generic functions, and data flow indicators
+# Config / env variable patterns
+SECRET_KEY
+API_KEY
+API_SECRET
+DATABASE_URL
+REDIS_URL
+AUTH_
+SECURITY_
+ENCRYPTION_
+CSP_
+COOKIE_
+# Generic security keywords
+password
+secret
+token
+credential
+authenticate
+authorize
+login
+logout
+session
+csrf
+xss
+cors
+sanitize
+escape
+validate
+# Dangerous functions (exist in most languages)
+eval(
+exec(
+system(
+popen(
+# Data flow / network
+http.
+https.
+socket
+connect
+listen
+bind
+accept
+# File operations
+file.
+upload
+download
+# Config access
+config.
+env.

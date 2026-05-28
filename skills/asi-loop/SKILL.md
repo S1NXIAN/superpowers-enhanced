@@ -1,153 +1,93 @@
 ---
 name: asi-loop
-description: "Use when fixing multiple security vulnerabilities, structural defects, or batch bugs that may share overlapping code. Implements ASI (Actionable Side Information) Batch Patching to prevent merge conflicts and regressions."
+description: "Fix one overlapping-code issue per cycle. Required when 3+ issues share a file. State via skills/asi-loop/scripts/asi.sh. TDD with reproducer first. Use when multiple fixes risk merge conflicts, regressions, or nullification."
 ---
+# ASI Loop — One-Issue-at-a-Time Patching
+Overlapping fixes cause merge conflicts and nullified fixes. Fix **one** issue per cycle. All state operations use `skills/asi-loop/scripts/asi.sh` – **never** read or write `.asi-state.json` directly.
 
-# ASI Loop — Actionable Side Information Batch Patching
+## State Commands (use exactly)
+| Action | Command |
+|--------|---------|
+| Init state | `asi.sh init '<json>'` |
+| Select next | `asi.sh select` |
+| Status | `asi.sh status` |
+| List open IDs | `asi.sh list-open` |
+| Get issue details | `asi.sh get <id>` |
+| Mark fixed | `asi.sh mark-fixed <id>` |
+| Mark blocked | `asi.sh mark-blocked <id> <reason>` |
+| Resolve by side effect | `asi.sh mark-resolved-side-effect <id>` |
+| Add issue | `asi.sh add-issue '<json>'` |
+| Increment cycle | `asi.sh complete-cycle` |
+| Validate | `asi.sh check-corrupt` |
 
-## The Problem
+Path: `skills/asi-loop/scripts/asi.sh`. If relative resolution fails, find the script co-located with this skill file.
 
-When an auditor or review surfaces multiple issues, the natural instinct is to fix them all in one pass.
-**Sequential batch-fixing is fragile when bugs share overlapping code.** An agent that tries to fix
-Bug A and Bug B in the same file simultaneously nearly always:
-
-- Creates merge conflicts with its own changes
-- Nullifies one fix while applying another
-- Introduces regression bugs from overlapping edits
-- Cannot isolate which change caused a new failure
-
-## The Protocol
-
-### Step 1: Receive Issue List
-
-You receive N issues from a scan, review, or audit. Each issue has:
-
-- **ID** — unique identifier
-- **File(s)** — affected file paths
-- **Severity** — critical / high / medium / low
-- **Description** — what is wrong
-- **Dependencies** — issues that must be fixed first
-
-### Step 2: Isolate One Issue
-
-Select exactly **one** issue to fix. Priority order:
-
-1. Critical severity, no dependencies
-2. Issues that unblock others (dependency root)
-3. Highest severity with fewest file overlaps
-4. Smallest change surface
-
-**NEVER** attempt to fix more than one issue simultaneously, even if they appear trivially independent.
-
-### Step 3: Fix the Isolated Issue
-
-- Apply the minimal change required
-- Follow TDD: RED → GREEN → REFACTOR for this single fix
-- Do not touch any file outside the issue's scope
-- Do not "opportunistically" fix nearby code
-
-### Step 4: Fast Re-test and Re-scan
-
-Run tests and scans **only on the affected files**:
-
-```bash
-# Run tests for affected files
-pytest tests/path/to/affected_test.py -v
-
-# Run linter on affected files
-ruff check path/to/affected.py
-
-# Run type checker on affected files
-mypy path/to/affected.py
+## Cycle Output Block (required before each fix)
+```
+[CYCLE N]
+State: <paste output of asi.sh status | head -1>
+Selected: <ID> | Reason: <1 sentence>
+Confidence: <High/Medium/Low – 1-sentence rationale>
+Bias check: <why this might be wrong, or "none found">
+Anchor check: <priority unchanged/changed if 3× harder>
 ```
 
-**ALL tests must pass before proceeding.**
+## Protocol
 
-### Step 5: Dynamically Update Issue List
+### 1. Receive Issue List
+Collect issues (scan, review, audit). Each must have: id, source (exact location, e.g. `scan-output.md:47`), files, severity (critical/high/medium/low), description (what is wrong, not how to fix), dependencies (IDs that must be fixed first). Call `asi.sh init '<json>'` with the full issue array.
 
-Before touching the next issue, recalculate:
+### 2. Isolate One Issue
+Run `asi.sh select`. It executes the priority waterfall (critical with no unresolved dependencies → unblocks most → severity with fewest overlaps → fallback by ID). Apply these bias checks on the result:
 
-1. **Re-scan fixed files** — does the fix resolve any other issues? Mark them as fixed.
-2. **Re-check remaining issues** — did the fix change the code such that a remaining issue
-   now requires a different approach? Update the description.
-3. **Re-prioritize** — did the fix create new work items? Add them to the list.
-4. **Check for conflicts** — do any remaining issues now touch code that was just changed?
-   Flag them for extra care.
+- **Primacy:** Did you evaluate every open issue, not just the first few? yes/no.
+- **Wrong-first-fix:** One reason this might be the wrong first fix. If valid, re-evaluate.
+- **Anchoring:** If the fix turns out 3× harder, does priority change? If yes, re-evaluate.
+- **Confirmation:** Name one piece of evidence that the chosen fix might be incorrect.
 
-Remove the fixed issue from the list.
+✅ **Never >1 per cycle.** Emit the Cycle Output Block.
 
-### Step 6: Cycle Counter — Anti-Infinite Loop Guard
+### 3. Fix – Reproducer-First TDD
+- **Bug:** write a test that reproduces the bug (must fail), apply fix, confirm reproducer passes and existing tests still pass.
+- **Non-bug:** standard RED → GREEN → REFACTOR.
 
-Increment a cycle counter at the end of each iteration:
+- No file outside the issue's `files` list touched.
+- No opportunistic fixes.
+- If a needed file is missing → wrong issue; revert and return to Step 2.
 
+### 4. Fast Re-test
+Run tests/lint on changed files only.
+
+✅ All pass → Step 5.  
+❌ Any fail:
+1. Revert: `git checkout -- <all-changed-files>`
+2. Diagnose: wrong understanding → re-describe, return to Step 2. Wrong fix → return to Step 3 with corrected fix.
+3. After 2 failures on same issue → `asi.sh mark-blocked <id> "<reason>"`, return to Step 2.
+
+### 5. Dynamic Update
+1. Run `asi.sh status` to get current open issues.
+2. For each open issue: if its `files` overlap with changed files **and** the original detection tool/command (as recorded in the issue's `source` field) no longer reports the issue → `asi.sh mark-resolved-side-effect <id>`.
+3. New issues discovered → `asi.sh add-issue '<json>'`.
+4. Mark the intentionally fixed issue: `asi.sh mark-fixed <id>`.
+5. `asi.sh complete-cycle`.
+6. Validate: `asi.sh check-corrupt` must exit 0.
+
+### 6. Halt Guard
+After `asi.sh complete-cycle`, run `asi.sh status`. If `cycle >= maxCycles`:
+1. Save diff: `git diff > asi-loop-patch-$(date +%s).diff` (if non-empty).
+2. Output:
 ```
-Current cycle: C
-Max cycles:    4
+[ASI-LOOP] Limit reached (4/4) on: <task>
+Fixed: <list IDs and outcomes>
+Remaining: <list open IDs with reasons>
+Stuck on: <ID> — <reason it kept cycling>
+Patch: asi-loop-patch-<timestamp>.diff
 ```
+3. Do **not** auto-resume. Wait for user.
 
-If `C > 4` on the same macro-task (top-level issue set):
-
-1. **Halt immediately.** Do not attempt cycle #5.
-2. **Preserve the active diff state** — save `git diff` output (or equivalent patch file) so no work is lost.
-3. **Prompt the user with a diagnostic summary:**
-
-   ```
-   [ASI-LOOP] Cycle limit reached (4/4) on: <macro-task description>
-   
-   Fixed so far:
-     - Issue #<id>: <outcome>
-     - Issue #<id>: <outcome>
-   
-   Remaining:
-     - Issue #<id>: <reason not fixed>
-     - Issue #<id>: <reason not fixed>
-   
-   Stuck on: Issue #<id> — <reason the loop keeps cycling>
-   
-   Suggested causes:
-     a) Fix creates new issues faster than it resolves them
-     b) Fix changes an interface used by 5+ files — waterfall effect
-     c) Remaining issues depend on a structural change that cascades
-   
-   Patch preserved at: /tmp/asi-loop-patch-<timestamp>.diff
-   ```
-
-4. **Do not auto-resume.** Wait for user direction — they may accept partial progress, approve a broader refactor, or divide the work into independent sub-tasks.
-
-### Step 7: Repeat
-
-Return to Step 2 with the updated list. Continue until all issues are resolved.
-
-## When to Use
-
-The ASI Loop is **mandatory** when:
-
-- 3+ issues affect the same file or module
-- Issues have overlapping dependencies
-- The fix for one issue could change the assumptions another issue was based on
-- An earlier batch-fix attempt failed or caused regressions
-
-It is **optional but recommended** for:
-
-- 2 independent issues in separate files
-- Cosmetic issues (naming, formatting)
-
-## Red Flags — Stop and Reassess
-
-| Pattern | Problem |
-|---------|---------|
-| "These are all independent, I can fix them together" | Overlapping edits are invisible until they conflict |
-| "I'll fix the easy ones quickly, then tackle the hard one" | Easy fixes change state the hard one depends on |
-| "Let me just also fix this nearby issue while I'm here" | Scope creep breaks isolation |
-| Fixing issue #3 without re-checking issues #1, #2 first | Dynamic update step was skipped |
-| "One more cycle should do it" (after cycle 4) | Coupling limit — fix cascades across files. Halt & escalate. |
-
-## Checklist
-
-- [ ] All N issues formally identified with files, severity, dependencies
-- [ ] Exactly one issue isolated per iteration
-- [ ] TDD cycle for the fix (RED → GREEN → REFACTOR)
-- [ ] Fast re-test on affected files only (exit 0)
-- [ ] Issue list updated and re-prioritized after each fix
-- [ ] No scope creep during any iteration
-- [ ] Cycle counter tracked (C ≤ 4); if limit reached, save diff + prompt user
+### 7. Repeat
+Return to Step 2 until `asi.sh list-open` outputs nothing. Terminal exit:
+```
+[ASI-LOOP] Complete
+Summary: $(asi.sh status)
+```

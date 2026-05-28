@@ -1,0 +1,32 @@
+# JS/Node.js security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+from 'crypto'
+from 'jsonwebtoken'
+from 'bcrypt'
+from 'passport'
+createHash
+createHmac
+createCipher
+createDecipher
+.sign(
+.verify(
+process.env.SECRET
+process.env.AUTH
+process.env.TOKEN
+process.env.KEY
+fetch(
+https.request
+axios
+.post(
+.get(
+db.run(
+db.query(
+pool.query(
+connection.query(
+eval(
+exec(
+child_process
+vm.runInNewContext
+JSON.parse(
+.innerHTML
+dangerouslySetInnerHTML

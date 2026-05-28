@@ -1,0 +1,71 @@
+# Rust security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+unsafe {
+unsafe impl
+unsafe trait
+unsafe fn
+std::mem::transmute
+std::mem::forget
+std::mem::uninitialized
+std::mem::zeroed
+MaybeUninit
+raw pointer
+as *mut
+as *const
+extern "C"
+no_mangle
+#[allow(unsafe]
+std::process::Command
+std::process::Output
+std::process::Stdio
+Command::new
+serde::Deserialize
+serde_json::from_str
+serde_json::from_reader
+bincode::deserialize
+rmp_serde::from_slice
+jsonwebtoken
+jsonwebtoken::encode
+jsonwebtoken::decode
+oauth2
+reqwest
+hyper::Client
+actix_web
+rocket
+axum
+tide
+warp
+sqlx
+diesel
+rusqlite
+sea_orm
+sql::prepare
+sql::execute
+password
+secret
+token
+credential
+crypto
+cipher
+encrypt
+decrypt
+tls
+ssl
+openssl
+ring
+uuid
+tower_http
+tower::ServiceBuilder
+rpassword
+zeroize
+secrecy
+include_str!
+include_bytes!
+std::fs::read
+std::fs::write
+std::net::TcpListener
+std::net::TcpStream
+tokio::net
+panic(
+unwrap(
+expect(

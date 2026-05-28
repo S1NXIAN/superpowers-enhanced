@@ -222,10 +222,11 @@ opencode-zeus/
 │   └── uninstall.mjs             # Cross-platform configuration restorer
 ├── agent/
 │   └── zeus.md               # Zeus Orchestrator (default agent)
-├── prompts/
-│   ├── implementer.md        # Consequence-weighted sub-agent implementer template
-│   ├── spec-reviewer.md     # Consequence-weighted sub-agent spec reviewer template
-│   └── code-quality-reviewer.md # Consequence-weighted sub-agent quality reviewer template
+├── skills/social-accountability/sub-agents/
+│   ├── implementer-agent.md        # Consequence-weighted sub-agent implementer template
+│   ├── spec-reviewer-agent.md      # Consequence-weighted sub-agent spec reviewer template
+│   ├── code-quality-agent.md       # Consequence-weighted sub-agent quality reviewer template
+│   └── security-reviewer-agent.md  # Consequence-weighted sub-agent security reviewer template
 ├── scripts/
 │   └── verify-hash.sh        # SHA-256 state hashing script
 ├── skills/

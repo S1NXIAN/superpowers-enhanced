@@ -218,7 +218,7 @@ After design approval, switch to `writing-plans`. Create bite-sized tasks (2-5 m
 ### 4. Subagent-Driven Development
 Execute the plan by dispatching fresh subagents per task. Each subagent gets complete task context (not the full session), including **social accountability framing** from the `social-accountability` skill (consequence-weighted instructions).
 
-Use the enhanced prompts at `prompts/implementer.md`, `prompts/spec-reviewer.md`, and `prompts/code-quality-reviewer.md` as templates.
+Use the enhanced prompts at `skills/social-accountability/sub-agents/implementer-agent.md`, `skills/social-accountability/sub-agents/spec-reviewer-agent.md`, and `skills/social-accountability/sub-agents/code-quality-agent.md` as templates.
 
 After each task:
 - Spec compliance review first

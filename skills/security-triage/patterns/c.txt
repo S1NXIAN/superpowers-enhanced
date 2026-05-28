@@ -1,0 +1,37 @@
+# C security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+# Memory & buffer (unsafe functions)
+gets(
+strcpy(
+strcat(
+sprintf(
+vsprintf(
+scanf(
+sscanf(
+alloca(
+# Execution & process control
+system(
+popen(
+execve(
+execvp(
+vfork(
+ptrace(
+# File system (temp file races)
+mktemp(
+mkstemp(
+tmpfile(
+# Permissions & sandboxing
+setuid(
+setgid(
+chroot(
+mprotect(
+# Networking
+bind(
+listen(
+accept(
+recvfrom(
+sendto(
+# Signal handling
+signal(
+sigaction(
+longjmp(

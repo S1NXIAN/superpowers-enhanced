@@ -1,0 +1,49 @@
+# C++ security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+# Standard C patterns (inherited from C)
+gets(
+strcpy(
+strcat(
+sprintf(
+vsprintf(
+scanf(
+sscanf(
+alloca(
+system(
+popen(
+mktemp(
+setuid(
+setgid(
+chroot(
+# C++-specific
+reinterpret_cast
+const_cast
+raw pointer
+new[]
+delete[]
+std::auto_ptr
+std::shared_ptr
+std::weak_ptr
+std::enable_shared_from_this
+std::thread
+std::async
+std::future
+std::promise
+std::mutex
+std::lock_guard
+std::unique_lock
+# Serialization / deserialization
+boost::serialization
+std::ofstream
+std::ifstream
+std::fstream
+# Raw memory
+malloc(
+free(
+memcpy(
+memmove(
+memset(
+# Template injection
+system(
+popen(
+exec(

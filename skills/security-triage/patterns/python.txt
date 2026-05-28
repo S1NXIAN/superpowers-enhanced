@@ -1,0 +1,34 @@
+# Python security-relevant patterns
+# Case-insensitive substring match — one pattern per line
+def authenticate
+class Auth
+def authorize
+def validate_token
+def check_permission
+def verify_identity
+def encrypt
+def decrypt
+def hash_
+def sign
+def verify_sig
+def sanitize_input
+def escape_html
+def escape_sql
+def rate_limit
+import crypto
+import auth
+import secret
+import security
+import oauth
+import jwt
+import saml
+import ssl
+import tls
+eval(
+exec(
+subprocess
+os.system
+pickle.load
+requests.get
+urllib.request
+sqlite3.execute

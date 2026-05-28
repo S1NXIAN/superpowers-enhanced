@@ -1,131 +1,86 @@
 ---
 name: deliberation-gate
-description: "Use AUTOMATICALLY before drafting architecture for any complex tier-3 task. Spawns three stakeholder roles (Skeptic, Minimalist, Maintainer) to critique the core idea from competing lenses before the blueprint is written."
+description: "MANDATORY before architecture for tier-3 tasks (4+ files, new subsystem, cross-cutting). Internal reasoning: simulate Skeptic, Minimalist, Maintainer. Maximum 2 user-rejection cycles. Security-triage override applies."
 ---
 
-# Dynamic Deliberation — Multi-Perspective Architecture Audit
+# Deliberation Gate — Multi-Perspective Architecture Audit
 
-## The Problem
+Internal reasoning exercise. Simulate all three roles sequentially in your own context. No external tools, no sub-agents.
 
-When given a complex task, the controller agent jumps straight into brainstorming a solution.
-If the initial prompt is even slightly misframed, the agent blindly designs a massive system
-on top of a flawed assumption. Research shows that forcing an agent to view a problem through
-**competing lenses** before drafting a plan produces significantly more robust designs.
+**Cross-skill contract:** If `security-triage` flagged any file in this task as T1-T3, deliberation is mandatory regardless of tier. Confirm at start: has `security-triage` already run? If yes and it fired → skip the tier check, run deliberation.
 
-## The Deliberation Gate
+## Tier Gate
 
-Before writing any blueprint, architecture doc, or implementation plan for a **tier-3 task**
-(complex, multi-file, cross-cutting), pause and spawn exactly **three** distinct virtual
-stakeholder roles. Each gets exactly **one un-debated response** — no back-and-forth, no
-rebuttal. Just their raw critique of the core idea.
+- **Tier 1** (1 file, <50 lines, no new deps) → skip.
+- **Tier 2** (2-3 files, existing patterns, optional new deps) → optional.
+- **Tier 3** (4+ files OR new subsystem OR cross-cutting OR new dependency) → **MANDATORY**.
 
-### Role 1: The Skeptic
+## Core Idea
 
-**Focus:** Why this architecture will fail at scale.
+Write **one paragraph of 3-5 sentences** stating what you intend to build. Must include: problem solved, main components, and how they connect. Must not include: bullet points, code snippets, library names, file paths, line counts, or questions.
 
-- Where are the concurrency bottlenecks?
-- What race conditions exist in this design?
-- Which assumptions break under load (10x, 100x, 1000x)?
-- What happens at the failure boundaries? Are they clean?
-- Which third-party dependencies become single points of failure?
+## Three Roles
 
-The Skeptic does not propose alternatives. The Skeptic **only finds faults**.
+For each role, produce **one paragraph of 2-5 sentences** in response to the core idea. Generate all roles, then re-read them in reverse order (Maintainer → Minimalist → Skeptic) before synthesizing. Do not skip any critique; every role must produce at least one point.
 
-### Role 2: The Minimalist
+### Skeptic — pure fault-finding, no alternatives
+At most 5 bullet points. Each must name the **specific component/assumption from the core idea** that creates the risk, and why. Format:
 
-**Focus:** How to achieve the goal using existing project utilities.
+- Risk: [component/interaction] — [consequence at 10×/100×/scale, or failure mode]
+- Failure: [component/interaction] — [what breaks when assumption fails]
 
-- What already exists in this project that solves part of the problem?
-- Can this be done without adding new dependencies?
-- Which files can be extended instead of created?
-- What is the smallest, most reversible change that delivers value?
-- Which requirements are actually optional?
+No solutions. No "we should".
 
-The Minimalist does not accept "new file" as the default answer. The Minimalist
-**challenges every addition**.
+### Minimalist — challenge every addition
+At most 5 bullet points. Each challenge must cite a **concrete existing module, function, or pattern** that could be extended instead, and why extension is or is not sufficient. Format:
 
-### Role 3: The Maintainer
+- Challenge: [existing code that covers this] — [why it cannot be extended, or what requirement forces the addition]
 
-**Focus:** Long-term technical debt and testability.
+Accept a new dep/file only if extension would break a shared module used by 10+ features.
 
-- How hard is this to test? Where are the untestable seams?
-- What tech debt does this design introduce?
-- Will the next developer understand the architecture from reading the code?
-- What happens when someone needs to modify this in 6 months?
-- Which parts are most likely to be misunderstood and cause future bugs?
-- Is there a simpler design that achieves the same goals with less surface area?
+### Maintainer — 6-month and 2-year horizon
+At most 5 bullet points, each anchored to a testability, debt, or clarity concern. Format:
 
-The Maintainer thinks in quarters and years, not minutes and hours.
+- Test: [component] — [how it would be tested in one sentence]; if untestable, state the missing seam.
+- Debt: [what degrades over time]
+- Clarity: [what the next developer won't understand]
 
-## Gate Protocol
+## Synthesis Protocol
+
+After re-reading roles in reverse:
+
+1. **Agreement** — what all three roles flagged. Must be addressed.
+2. **Conflict resolution** — where roles disagree. Rule: if Skeptic and Maintainer agree, keep the critique. Minimalist alone doesn't veto. A single-role flag is deprioritized unless clearly critical.
+3. **Revised direction** — 2-4 sentences incorporating all kept critiques. If impossible, generate a new core idea and re-run roles (this is a self-rejection cycle, doesn't count toward user limit).
+
+Output:
 
 ```
-┌──────────────────────────────────────────────┐
-│  1. Identify task complexity                  │
-│     └─ Simple (tier-1) → skip gate            │
-│     └─ Moderate (tier-2) → optional gate       │
-│     └─ Complex (tier-3) → MANDATORY gate       │
-├──────────────────────────────────────────────┤
-│  2. Present core idea to all three roles       │
-│     (same prompt, no framing bias)             │
-├──────────────────────────────────────────────┤
-│  3. Collect exactly one response per role      │
-│     (no inter-role debate, no follow-ups)      │
-├──────────────────────────────────────────────┤
-│  4. Synthesize:                               │
-│     └─ What survived all three critiques?      │
-│     └─ What must change before proceeding?     │
-│     └─ What is the revised architecture?       │
-├──────────────────────────────────────────────┤
-│  5. Present revised architecture for approval  │
-│     (if user rejects, re-run gate with new     │
-│      constraints before drafting again)        │
-└──────────────────────────────────────────────┘
-```
-
-## Tier Classification
-
-| Tier | Criterion | Gate |
-|------|-----------|------|
-| 1 | Single file, < 50 lines changed, no new deps | Skip |
-| 2 | 2-3 files, existing patterns, optional new deps | Optional |
-| 3 | 4+ files, new subsystem, cross-cutting concerns, new deps | **Mandatory** |
-
-## When to Trigger
-
-This skill activates **automatically** when:
-
-- The user says "build a [system/platform/architecture]"
-- The brainstorming phase reveals a cross-cutting design
-- The task touches 4+ files or introduces a new subsystem
-- Dependencies, databases, or external services are involved
-- The initial prompt is vague or could be interpreted multiple ways
-
-## Synthesis Format
-
-After collecting all three responses, produce a structured synthesis:
-
-```markdown
 ## Deliberation Synthesis
-
-### Survived critique (keep)
-- [finding 1]
-- [finding 2]
-
-### Must change (revise)
-- [finding 1] → [revised approach]
-- [finding 2] → [revised approach]
-
-### Revised architecture
-[2-3 sentence summary of the corrected approach]
+### Core idea evaluated
+[original or last revised paragraph]
+### Survived critique (adopted)
+- [finding] — from [role]
+### Overruled (with rationale)
+- [finding] — from [role]. Overruled because [reason].
+### Revised direction
+[2-4 sentences]
+### Confidence
+[High/Medium/Low] — one-sentence justification
+### Unresolved questions (if any)
+- [question]
 ```
 
-## Red Flags
+## User Rejection
 
-| Pattern | Problem |
-|---------|---------|
-| Skipping the gate because "I already understand the architecture" | Confirmation bias |
-| Letting the Skeptic propose alternatives | Role scope creep |
-| Dismissing the Minimalist as "it won't work" without evidence | Defaulting to complexity |
-| Combining roles or having them debate | Loses independent perspective |
-| Skipping synthesis ("the critiques speak for themselves") | No actionable output |
+**Full rejection** → incorporate constraints, re-run from core idea. Maximum 2 cycles; after 2, state "returning to brainstorming" and stop.
+
+**Partial acceptance** → apply revision to the direction, don't re-run. If the revision contradicts an adopted critique, flag the contradiction.
+
+**Silence** → synthesis is final; do not implement without explicit approval.
+
+## Post-Synthesis Verification (execute in this order)
+
+1. Re-read role responses in reverse before synthesizing.
+2. Confirm Minimalist cited concrete existing code for every challenge; if not, re-do that role.
+3. Confirm security-triage override was checked; if it fired, deliberation was run regardless of tier.
