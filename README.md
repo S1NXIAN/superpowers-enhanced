@@ -40,7 +40,22 @@ Before installing `opencode-zeus`, ensure you have the following installed on yo
 
 ### Installation
 
-`opencode-zeus` provides a cross-platform installer script that automates config merging and file deployment.
+Choose the installation method that fits your workflow:
+
+#### Option A: One-Liner Installer (Quickest)
+
+You can install `opencode-zeus` directly using a preflight-checked shell script. This script automatically checks your environment, installs Node.js if missing, and executes the installer:
+
+* **macOS / Linux:**
+  ```bash
+  bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/install.sh)
+  ```
+* **Windows (PowerShell):**
+  ```powershell
+  irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/install.ps1 | iex
+  ```
+
+#### Option B: Standard Manual Installation
 
 1. Clone this repository to your local workspace:
    ```bash
@@ -166,7 +181,22 @@ npm run test:integration
 
 ## Uninstallation
 
-If you need to remove the `opencode-zeus` overlay and restore your original OpenCode configuration:
+If you need to remove the `opencode-zeus` overlay and restore your original OpenCode configuration, you can use either of the following methods:
+
+### Option A: One-Liner Uninstaller
+
+* **macOS / Linux:**
+  ```bash
+  bash <(curl -fsSL https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/uninstall.sh)
+  ```
+* **Windows (PowerShell):**
+  ```powershell
+  irm https://raw.githubusercontent.com/S1NXIAN/opencode-zeus/main/installers/uninstall.ps1 | iex
+  ```
+
+### Option B: Local Clean
+
+If you have the repository checked out locally:
 
 ```bash
 node bin/uninstall.mjs
