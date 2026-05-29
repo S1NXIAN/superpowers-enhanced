@@ -24,9 +24,8 @@ Dispatch `architect` and `hacker` sub-agents to siege the high-level approach.
 **Parallel Rule:** Dispatch both simultaneously in a single Turn.
 
 ### Phase 3: Brainstorming & Spec Approval
-Invoke `brainstorming`. 
-- **UI Trigger:** If `designer` tag is present, Zeus MUST start the local preview bridge (`scripts/vision.sh start`) before drafting the design.
-- **Requirement:** Failure-mode check (adversarial reasoning) before approval.
+Invoke `brainstorming`. Explore requirements and propose design. 
+**Requirement:** Failure-mode check (adversarial reasoning) before approval.
 
 ### Phase 4: Implementation Planning
 Invoke `writing-plans`. Break work into 2-5 min tasks. 
@@ -46,8 +45,7 @@ Present final summary with verification evidence.
 Invoke `finishing-a-development-branch` only after explicit user approval.
 
 ### Phase 8: Automated Cleanup
-1. Run `$HOME/.config/opencode/bin/cleanup.mjs`.
-2. **Vision Kill:** Run `scripts/vision.sh stop` to ensure zero orphaned processes.
+Run `$HOME/.config/opencode/bin/cleanup.mjs` to purge AI artifacts.
 
 ## Rationalization Table
 
