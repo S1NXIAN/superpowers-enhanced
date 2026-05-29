@@ -13,7 +13,6 @@ describe('lib/config-schema', () => {
   it('passes valid full config', () => {
     const res = validateConfig({
       '$schema': 'url',
-      plugin: ['a', 'b'],
       provider: { type: 'google' },
       autoupdate: true,
       default_agent: 'zeus',
@@ -23,12 +22,6 @@ describe('lib/config-schema', () => {
     });
     assert.equal(res.valid, true);
     assert.equal(res.errors.length, 0);
-  });
-
-  it('errors on invalid plugin type', () => {
-    const res = validateConfig({ plugin: 'string' });
-    assert.equal(res.valid, false);
-    assert.ok(res.errors.some(e => e.includes('plugin')));
   });
 
   it('errors on invalid default_agent type', () => {
@@ -74,12 +67,6 @@ describe('lib/config-schema', () => {
     assert.equal(res.errors.length, 0);
     assert.equal(res.warnings.length, 1);
     assert.ok(res.warnings[0].includes('enable_experimental_skills'));
-  });
-
-  it('errors on plugin array with non-string entry', () => {
-    const res = validateConfig({ plugin: ['a', 123] });
-    assert.equal(res.valid, false);
-    assert.ok(res.errors.some(e => e.includes('plugin')));
   });
 
   it('errors on skills.paths with non-string entry', () => {

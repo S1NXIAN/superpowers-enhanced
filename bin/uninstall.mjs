@@ -4,7 +4,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  ZEUS_PLUGIN, SKILLS_PATH, CONFIG_DIR, CONFIG_JSON_PATH,
+  SKILLS_PATH, CONFIG_DIR, CONFIG_JSON_PATH,
   BACKUP_PARENT, MANAGED_FILES, MANAGED_DIRS
 } from '../lib/constants.mjs';
 import { createConsole } from '../lib/console.mjs';
@@ -65,13 +65,6 @@ function backupFileSource(backupPath, configRelPath) {
 
 function planJsonRevert(config) {
   const changes = [];
-  const plugins = config.plugin || [];
-  const pluginIndex = plugins.indexOf(ZEUS_PLUGIN);
-  if (pluginIndex !== -1) {
-    const newPlugins = [...plugins];
-    newPlugins.splice(pluginIndex, 1);
-    changes.push({ field: 'plugin', before: plugins, after: newPlugins.length > 0 ? newPlugins : undefined });
-  }
   if (config.default_agent === 'zeus') {
     changes.push({ field: 'default_agent', before: 'zeus', after: undefined });
   }
@@ -192,10 +185,7 @@ function revertConfig(configChanges) {
   if (!config) return con.outWarn('Could not read opencode.json for revert');
 
   for (const change of configChanges) {
-    if (change.field === 'plugin') {
-      if (change.after === undefined) delete config.plugin;
-      else config.plugin = change.after;
-    } else if (change.field === 'default_agent') {
+    if (change.field === 'default_agent') {
       delete config.default_agent;
     } else if (change.field === 'instructions') {
       if (change.after === undefined) delete config.instructions;
@@ -249,10 +239,6 @@ function verify(restoredPaths = []) {
 
   const config = existsSync(CONFIG_JSON_PATH) ? readJson(CONFIG_JSON_PATH) : null;
   if (config) {
-    const plugins = config.plugin || [];
-    if (plugins.some(p => p === ZEUS_PLUGIN)) { con.outError('opencode.json still has zeus plugin'); verifyFailed = true; }
-    else con.outOk('Zeus Elite plugin removed from opencode.json');
-
     if (config.default_agent === 'zeus') { con.outError('default_agent still set to zeus'); verifyFailed = true; }
     else con.outOk('default_agent no longer zeus');
 

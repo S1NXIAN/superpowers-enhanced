@@ -80,19 +80,6 @@ function preflight() {
     con.outOk('OpenCode config found at ' + CONFIG_DIR);
   }
 
-  if (existsSync(CONFIG_JSON_PATH)) {
-    const config = readJson(CONFIG_JSON_PATH);
-    if (config) {
-      const plugins = config.plugin || [];
-      if (plugins.some(p => p.includes('zeus'))) {
-        con.outOk('Zeus Elite plugin declared in opencode.json');
-      } else {
-        con.outWarn('Zeus Elite plugin not found in opencode.json plugin array');
-        con.outSubdued('Will be added during installation.');
-      }
-    }
-  }
-
   if (gitAvailable()) con.outOk('git is available');
   else con.outWarn('git not found \u2014 diff display will be limited');
 
@@ -259,8 +246,7 @@ function installConfig(configChanges) {
   if (!config) return con.outError('Could not read opencode.json for merge');
 
   for (const change of configChanges) {
-    if (change.field === 'plugin') config.plugin = change.after;
-    else if (change.field === 'default_agent') config.default_agent = change.after;
+    if (change.field === 'default_agent') config.default_agent = change.after;
     else if (change.field === 'instructions') config.instructions = change.after;
     else if (change.field === 'skills.paths') {
       if (!config.skills) config.skills = {};
