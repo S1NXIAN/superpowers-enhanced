@@ -230,17 +230,22 @@ function installFiles(fileChanges, dirChanges) {
   }
 }
 
-function ensureMemoryDir() {
-  if (dryRunMode) {
-    con.outInfo('Would create zeus/memory/ directory');
-    return;
-  }
-  const memDir = join(REPO_DIR, 'zeus', 'memory');
-  try {
-    mkdirSync(memDir, { recursive: true });
-    con.outOk('Created zeus/memory/');
-  } catch (err) {
-    con.outWarn(`Could not create zeus/memory/: ${err.message}`);
+function ensureZeusDirs() {
+  const dirs = [
+    { name: 'zeus/memory/', path: join(REPO_DIR, 'zeus', 'memory') },
+    { name: 'zeus/plans/', path: join(REPO_DIR, 'zeus', 'plans') },
+  ];
+  for (const dir of dirs) {
+    if (dryRunMode) {
+      con.outInfo(`Would create ${dir.name} directory`);
+      continue;
+    }
+    try {
+      mkdirSync(dir.path, { recursive: true });
+      con.outOk(`Created ${dir.name}`);
+    } catch (err) {
+      con.outWarn(`Could not create ${dir.name}: ${err.message}`);
+    }
   }
 }
 
@@ -349,7 +354,7 @@ async function main() {
   installConfig(configChanges);
   installFiles(fileChanges, dirChanges);
   installGitHook();
-  ensureMemoryDir();
+  ensureZeusDirs();
   const verified = verify();
 
   if (backupDir) con.outInfo(`Backups saved to ${backupDir}`);

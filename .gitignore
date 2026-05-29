@@ -15,6 +15,7 @@ skills-lock.json
 
 # AI memory artifacts (cross-session state, auto-generated, per-project)
 zeus/memory/
+zeus/plans/
 # Legacy locations — may exist from prior installs
 .context-snapshot.json
 known-issues.md

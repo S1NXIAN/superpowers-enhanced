@@ -197,7 +197,7 @@ Task 2: Recovery modes...
 ## Integration
 
 **Required before this skill:**
-- `task-planner` — optional: decompose complex features into parallel-executable task DAG
+- `task-planner` — optional: decompose complex features into YAML DAG plans at `zeus/plans/{feature}/` with computed waves and critical path
 - `writing-plans` — produces the plan this skill executes
 
 **Required after this skill:**
@@ -205,11 +205,19 @@ Task 2: Recovery modes...
 - `finishing-a-development-branch` — present merge/PR/discard options
 
 **Subagents used by this skill:**
-- `task-planner` — decompose feature into parallel DAG before dispatch
+- `task-planner` — decompose feature into YAML DAG with waves, compute critical path and estimates
 - `code-exploration` — pre-task research (understand architecture before implementing)
 - `spec-validation` — Stage 1 review (spec vs implementation)
 - `quality-review` — Stage 2 review (code quality, technical debt)
 - `root-cause-analysis` — investigate BLOCKED tasks or unexpected failures
+
+**Execution pattern for task-planner plans:**
+After plan is created at `zeus/plans/{feature}/`, dispatch by wave:
+1. Wave 1 — all root tasks (no deps) in parallel
+2. Wait for all Wave 1 tasks to complete, update status in YAML files
+3. Wave 2 — tasks whose deps are all satisfied, in parallel
+4. Repeat until all waves complete
+5. Delete plan directory: `rm -rf zeus/plans/{feature}/`
 
 **Subagents should use:**
 - `test-driven-development` — enforced by their system prompts

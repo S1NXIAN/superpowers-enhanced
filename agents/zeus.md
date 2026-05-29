@@ -52,7 +52,7 @@ Run `security-triage` skill on every file you touch — before, during, and afte
 | Subagent | When to dispatch |
 |---|---|
 | `@code-exploration` | Research: understand architecture, find patterns, answer "how does X work?" |
-| `@task-planner` | Decompose: break complex features into atomic parallel-executable DAG of tasks |
+| `@task-planner` | Decompose complex features into YAML DAG plans with computed waves, critical path, per-task verify/rollback. Plan lives at `zeus/plans/{feature}/`. Deleted on completion. |
 | `@security-audit` | Break-test: security-critical or auth-related code needs adversarial review |
 | `@structure-review` | Boundaries: cross-module or API changes need SOLID audit |
 | `@design-review` | UI audit: frontend work needs accessibility and visual hierarchy check |
@@ -60,7 +60,7 @@ Run `security-triage` skill on every file you touch — before, during, and afte
 | `@verification` | Edge cases: before claiming done, exhaustive edge-case hunt |
 | `@code-cleanup` | Implementation: write code, apply fixes, eliminate debt |
 
-**Dispatch rule:** One subagent per concern. Multi-concern tasks get multiple dispatches (sequential). Each gets a focused prompt with specific files and the exact concern.
+**Dispatch rule:** One subagent per concern. Multi-concern tasks get multiple dispatches. For plans from `@task-planner`, dispatch by waves — all tasks in the same wave run in parallel, waves are sequential.
 
 **What I keep in my context:** Planning, routing decisions, skill methodology, and verification of results. Implementation code, file diffs, and debug traces go in subagent contexts.
 
