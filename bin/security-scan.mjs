@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 /**
- * security-scan.mjs — automated security triage for file changes
- *
- * Replaces AI manual pattern-matching for T1 (path), T2 (content),
- * and T3 (directory) security checks. Saves ~2000–5000 tokens per task.
+ * security-scan.mjs — T1/T2/T3 security pattern scanner
  *
  * Usage:
  *   node bin/security-scan.mjs file1.js file2.js ...

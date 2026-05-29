@@ -2,16 +2,11 @@
 /**
  * init-memory.mjs — bootstrap zeus/memory/ for a project
  *
- * Creates per-project AI memory directory with:
- *   - project-map.md       (generated from project structure)
- *   - known-issues.md      (empty template)
- *   - context-snapshot.json (git-based change detection)
- *
  * Usage:
- *   node bin/init-memory.mjs              # normal run
- *   node bin/init-memory.mjs --dry-run    # preview only
- *   node bin/init-memory.mjs --force      # overwrite existing files
- *   node bin/init-memory.mjs --help       # usage info
+ *   node bin/init-memory.mjs
+ *   node bin/init-memory.mjs --dry-run
+ *   node bin/init-memory.mjs --force
+ *   node bin/init-memory.mjs --help
  */
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';

@@ -1,21 +1,13 @@
 #!/usr/bin/env node
 /**
- * staleness-check.mjs — one-shot memory freshness check for Session Init
- *
- * Replaces multi-step AI reasoning: checks context-snapshot + project-map
- * freshness in one command. Saves ~800–1200 tokens per session init.
+ * staleness-check.mjs — memory freshness check
  *
  * Usage:
  *   node bin/staleness-check.mjs [project_root]
  *   node bin/staleness-check.mjs --help
  *
  * Output (one line):
- *   FRESH                  — both files are current
- *   SNAPSHOT_STALE:<hash>  — snapshot hash != HEAD
- *   MAP_STALE:<hash>       — map hash != HEAD
- *   SNAPSHOT_MISSING       — no context-snapshot.json
- *   MAP_MISSING            — no project-map.md
- *   NO_GIT                 — not a git repository
+ *   FRESH | SNAPSHOT_STALE:<h> | MAP_STALE:<h> | SNAPSHOT_MISSING | MAP_MISSING | NO_GIT
  */
 
 import { existsSync, readFileSync } from 'node:fs';
