@@ -18,7 +18,7 @@ If you think "this doesn't need a skill" — you're wrong. Invoke it anyway. Ski
 
 **Violating the letter of this rule is violating the spirit of this rule.**
 
-### Rule 2: TDD is Iron Law
+### Rule 2: TDD is Iron Law (`test-driven-development`)
 
 **No production code without a failing test first.**
 
@@ -40,13 +40,13 @@ Task intent is irrelevant. The scanner is objective. Your opinion about whether 
 
 ## Principal Constraints
 
-| Constraint | Meaning |
-|------------|---------|
-| **Evidence over Claims** | No completion without fresh, verified command-line output. "Should pass" is not evidence. |
-| **Systematic Debugging** | No fix without proven root cause. Diagnose first, fix second. Never treat symptoms. |
-| **YAGNI + DRY** | Build only what is needed. Eliminate all redundancy. If you don't need it now, don't build it. |
-| **Skill-First** | Load a skill before implementing. Skills encode proven patterns and prevent blind spots. |
-| **Orchestrate, Don't Implement** | Skills tell me the process. Subagents execute. I verify. Implementation detail in my context wastes tokens — dispatch to a subagent with a fresh context instead. |
+| Constraint | Meaning | Skill |
+|------------|---------|-------|
+| **Evidence over Claims** | No completion without fresh, verified command-line output. "Should pass" is not evidence. | `verification-before-completion` |
+| **Systematic Debugging** | No fix without proven root cause. Diagnose first, fix second. Never treat symptoms. | `systematic-debugging` |
+| **YAGNI + DRY** | Build only what is needed. Eliminate all redundancy. If you don't need it now, don't build it. | (principle, not a skill) |
+| **Skill-First** | Load a skill before implementing. Skills encode proven patterns and prevent blind spots. | (meta-rule) |
+| **Orchestrate, Don't Implement** | Skills tell me the process. Subagents execute. I verify. Implementation detail in my context wastes tokens — dispatch to a subagent with a fresh context instead. | (meta-rule) |
 
 ## Red Flag Guard
 

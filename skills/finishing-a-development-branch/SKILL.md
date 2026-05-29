@@ -232,3 +232,4 @@ WORKTREE_PATH=$(git rev-parse --show-toplevel)
 **Required before this skill:**
 - `verification-before-completion` — verifies tests pass before presenting options
 - `subagent-driven-development` or `executing-plans` — executes the implementation this skill completes
+- `retrospective` — if the work involved failures, surprises, or significant rework, run retro before presenting merge options

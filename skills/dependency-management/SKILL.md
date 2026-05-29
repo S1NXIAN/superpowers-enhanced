@@ -141,3 +141,4 @@ Never hand-edit a lockfile. The resolution process:
 - `systematic-debugging` — when an update causes unexpected failures
 - `test-driven-development` — when the update requires new tests for changed behavior
 - `error-recovery` — to document recurring dependency issues in `known-issues.md`
+- `pre-mortem` — before major version upgrades, run pre-mortem to identify migration and breaking-change risks

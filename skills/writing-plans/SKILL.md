@@ -276,6 +276,20 @@ If your plan contains any of these, it's not ready for execution:
 
 **Fix every issue before presenting the plan for approval.**
 
+## Integration
+
+**Required before this skill:**
+- `brainstorming` — creative design decisions should be validated before detailed plan writing
+- `pre-mortem` — identify execution risks before planning the implementation sequence
+- `deliberation-gate` — high-stakes architectural decisions must resolve via PROCEED before planning
+
+**Required after this skill:**
+- `subagent-driven-development` — executes the plan by dispatching task subagents from the YAML DAG plan
+- `executing-plans` — sequential fallback when tasks are tightly coupled and share files
+
+**Role in the pipeline:**
+This skill is the **planner** — it receives an approved design direction and produces an executable blueprint. It hands off to the **builder** (`subagent-driven-development` or `executing-plans`) who executes the plan.
+
 ## Final Gate
 
 Before handing off the plan:

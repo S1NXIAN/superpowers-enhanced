@@ -131,6 +131,6 @@ Synthesize format:
 - `premise-check` — validates the work exists at all before deliberating approaches
 
 **Required after this skill:**
-- If PROCEED → `brainstorming` for detailed design
+- If PROCEED → `brainstorming` for detailed design, then `pre-mortem` to validate execution risk before planning
 - If REFRAME → restart deliberation with new framing
 - If ABORT → `premise-check` to validate if work is needed

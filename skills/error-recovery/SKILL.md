@@ -107,3 +107,4 @@ exact command to run
 **Related skills:**
 - `systematic-debugging` — for debugging issues not in the database
 - `verification-before-completion` — verify the fix works before documenting it
+- `retrospective` — after documenting recurring issues, run retro to fix the process that allows them to recur

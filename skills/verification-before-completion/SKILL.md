@@ -161,9 +161,15 @@ Catch yourself doing any of these? STOP. Run the verification command NOW.
 
 ## Integration
 
+**Required before this skill:**
 - `test-driven-development` — produces the tests you verify against
 - `subagent-driven-development` — dispatches tasks that need independent verification
+
+**Required after this skill:**
 - `finishing-a-development-branch` — uses this skill before presenting merge options
+
+**Related skills:**
+- `retrospective` — if verification exposed a process gap (missing test, missed edge case, unclear spec), run retro to prevent recurrence
 
 ## The Bottom Line
 

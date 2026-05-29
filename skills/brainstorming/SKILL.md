@@ -136,3 +136,4 @@ Invoke `writing-plans` to create the implementation plan. Do NOT invoke any othe
 
 **Sub-skills:**
 - `premise-check` — validates if the work should exist at all (run before brainstorming)
+- `pre-mortem` — after design direction is chosen, identify failure modes before committing to implementation

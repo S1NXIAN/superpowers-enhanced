@@ -289,6 +289,7 @@ If you catch yourself thinking any of these, you're about to violate the Iron La
 **Related skills:**
 - `self-consistency-reasoner` — for multi-path hypothesis generation (Phase 3)
 - `error-recovery` — to document complex platform bugs in `known-issues.md`
+- `retrospective` — after root cause is confirmed, run retro to fix the process gap that allowed the bug
 
 **Subagent dispatch:**
 - `root-cause-analysis` — dispatch for independent investigation of complex bugs

@@ -199,6 +199,7 @@ Task 2: Recovery modes...
 **Required before this skill:**
 - `task-planner` — optional: decompose complex features into YAML DAG plans at `zeus/plans/{feature}/` with computed waves and critical path
 - `writing-plans` — produces the plan this skill executes
+- `pre-mortem` — check for integration risks before dispatching parallel tasks
 
 **Required after this skill:**
 - `verification-before-completion` — verify all tasks pass before claiming completion
