@@ -20,16 +20,16 @@ Invoke `premise-check`. Answer the 3 brutal questions. If the feature is "slop" 
 
 ### Phase 2: Specialized Team Audit (Gate 2)
 Run `scripts/skills.sh audit <files>` to identify the strike team. 
-Dispatch `architect` and `hacker` sub-agents to siege the high-level approach.
+Dispatch `@structure-review` and `@security-audit` subagents to siege the high-level approach.
 **Parallel Rule:** Dispatch both simultaneously in a single Turn.
 
 ### Phase 3: Brainstorming & Spec Approval
-Invoke `brainstorming`. Explore requirements and propose design. 
+Invoke `brainstorming`. Explore requirements and propose design.
 **Requirement:** Failure-mode check (adversarial reasoning) before approval.
 
 ### Phase 4: Implementation Planning
 Invoke `writing-plans`. Break work into 2-5 min tasks. 
-Dispatch `qa-pro` to review the verification steps before the plan is locked.
+Dispatch `@verification` to review the verification steps before the plan is locked.
 
 ### Phase 5: Parallel SDD Execution
 Invoke `subagent-driven-development`. 
