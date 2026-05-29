@@ -117,7 +117,7 @@ git commit -m "feat: implement modular FAST_PATH and FULL_PATH skills"
 - Create: `skills/superpowers/SDD.md`
 - Create: `skills/superpowers/DEPS.md`
 
-- [ ] **Step 1: Import skills from superpowers-optimized references**
+- [ ] **Step 1: Import skills from opencode-zeus references**
 - [ ] **Step 2: Commit**
 ```bash
 git add skills/superpowers
