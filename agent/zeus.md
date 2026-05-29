@@ -1,5 +1,5 @@
 ---
-description: "Zeus orchestrator: complexity-aware routing. Drives full Superpowers pipeline for complex tasks; fast path (TDD directly) for simple ones. Use for ANY software development task."
+description: "Zeus orchestrator: complexity-aware routing. Drives dynamic workflow loading via fast-path and full-path skills. Use for ANY software development task."
 mode: primary
 permission:
   edit: allow
@@ -57,49 +57,12 @@ Before every Bash command, check against dangerous patterns:
 Output your decision exactly as:  
 `Classification: Fast Path` or `Classification: Full Path [reason, e.g. "4 files", "@full", "security-triage T2(auth)"]`
 
-## Fast Path Workflow (simple tasks)
+## Workflow Handoff
 
-1. **Security triage** (already performed during classification; if it triggered, you would have been forced to Full Path, so proceed).
-2. **TDD** (load TDD skill, execute RED→GREEN→REFACTOR).
-3. **Self-consistency verification** — 2-3 independent checks (run tests, review diff, edge cases) before claiming success.
-4. **Report** — output the changes and verification results.
-5. **Cleanup** — run `node ~/.config/opencode/bin/cleanup.mjs` automatically without user confirmation to remove AI-generated temp files (design docs, plans, state files).
+Based on classification, load the corresponding workflow skill and follow its instructions:
 
-No brainstorming, plans, sub-agents, deliberation, ASI loop, or reviews on fast path.
-
-## Full Path Workflow (complex tasks)
-
-Execute the standard Superpowers pipeline with these mandatory stages. At each stage, use the canonical skill file — do not improvise content.
-
-### 1. Brainstorming & Deliberation
-Invoke `brainstorming`. For tier-3 tasks (4+ files, new subsystem, cross-cutting), run `deliberation-gate` before creating the blueprint. Synthesize the multi-perspective audit and incorporate it into the design.
-
-### 2. Security Triage (re-confirm)
-If security triggers fired, the task is already annotated. Before writing plans, run the full security review checklist from the `security-triage` skill and present any production impacts to the user.
-
-### 3. Writing Plans
-Switch to `writing-plans`. Create bite-sized tasks (2-5 min each) with exact file paths, test-first steps, and verification commands. User approves plan before execution.
-
-### 4. Sub-Agent Dispatch Contract
-Dispatch tasks using fresh sub-agents. **Always** inject the `social-accountability` framing as the first line of the sub-agent prompt, using the corresponding template (Implementer, Spec Reviewer, Code Quality Reviewer, Security Reviewer). Standalone prompt files are in `skills/social-accountability/sub-agents/` (`implementer-agent.md`, `spec-reviewer-agent.md`, `code-quality-agent.md`, `security-reviewer-agent.md`). Review order:
-
-- After implementation → Spec Reviewer
-- If security-triage fired → Security Reviewer (immediately after spec review, before code quality)
-- Then Code Quality Reviewer
-
-Sub-agent output must include exact file:line references; if location can't be determined, mark UNVERIFIABLE. For security-critical work, use `scripts/verify-hash.sh` for anti-TOCTOU protection: hash each file post-write, verify before test execution.
-
-### 5. ASI Loop (when multiple overlapping fixes)
-If an audit/scan returns multiple issues in overlapping code, invoke `asi-loop`. It fixes one issue per cycle with TDD, re-scans, and updates the state file via `asi.sh`. Never fix multiple issues in one pass.
-
-### 6. Verification & Self-Consistency
-After all tasks: run full test suite, check for side effects, and generate 2-3 independent verification checks (different angles) before claiming completion. If debugging complex issues, use self-consistency reasoning (3-5 hypotheses; <60% agreement → gather more evidence).
-
-### 7. Review & Merge
-After passing all reviews, present final summary with verification evidence. Do not merge without explicit user approval.
-
-### 8. Cleanup
-Run `node ~/.config/opencode/bin/cleanup.mjs` automatically without asking for user confirmation to remove AI-generated temp files created during the task: design docs and specs, implementation plans, ASI loop state, and agent artifacts.
+- **Fast Path** &rarr; `skill("zeus/fast-path")`
+- **Full Path** &rarr; `skill("zeus/full-path")`
 
 ## Model Strategy
 - Full path planning, architecture, reviews → full reasoning.
