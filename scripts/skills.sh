@@ -1,107 +1,92 @@
 #!/usr/bin/env bash
+# ===========================================================================
+# Zeus Elite — System Utility (skills.sh)
+# Optimized for absolute speed and deterministic multi-tag routing.
+# ===========================================================================
 
 set -euo pipefail
 
-# Zeus 2.0 Skills Utility
+readonly SKILLS_DIR="${HOME}/.config/opencode/skills/opencode-zeus"
+readonly BIN_DIR="${HOME}/.config/opencode/bin"
 
-readonly COMMAND="${1:-}"
+# ---------------------------------------------------------------------------
+# High-Performance Discovery
+# ---------------------------------------------------------------------------
+list_skills() {
+    if command -v fd >/dev/null 2>&1; then
+        fd . "$SKILLS_DIR" --max-depth 1 --type d --exec basename {}
+    elif command -v fdfind >/dev/null 2>&1; then
+        fdfind . "$SKILLS_DIR" --max-depth 1 --type d --exec basename {}
+    else
+        ls -F "$SKILLS_DIR" | grep '/' | sed 's/\///'
+    fi
+}
 
-# Function to determine audit tags based on filename and content signatures
+# ---------------------------------------------------------------------------
+# Semantic Strike Team Router
+# ---------------------------------------------------------------------------
 get_audit_tags() {
     local -r file="$1"
     local tags=()
     
-    # 0. Check for Manual Overrides (@zeus: [tag] or @zeus: strike-team)
-    if [[ -f "$file" ]]; then
-        if grep -qi "@zeus: strike-team" "$file"; then
-            echo "architect cleaner hacker qa-pro"
-            return
-        fi
-        
-        # Specific tag overrides
-        for tag in "architect" "cleaner" "hacker" "qa-pro"; do
-            if grep -qi "@zeus: $tag" "$file"; then
-                tags+=("$tag")
-            fi
-        done
+    [[ ! -f "$file" ]] && echo "architect" && return
+
+    # Gate 0: Manual Overrides
+    if grep -qi "@zeus: strike-team" "$file"; then
+        echo "hacker architect qa-pro cleaner"
+        return
     fi
 
-    # 1. Filename Heuristics (Quick Pass)
-    if [[ "$file" =~ \.(js|ts|py|go|rs|rb|php|java|c|cpp|cs|swift|kt)$ ]]; then
-        tags+=("cleaner")
-    fi
-    if [[ "$file" =~ (\.test\.|\.spec\.|tests/|coverage/|mock|fixture|stub) ]]; then
-        tags+=("qa-pro")
-    fi
-    if [[ "$file" =~ (auth|security|crypto|login|token|permissions|acl|encrypt|decrypt|hash|cors|policy|secret) ]]; then
+    # Specific tag overrides
+    for tag in "architect" "cleaner" "hacker" "qa-pro"; do
+        if grep -qi "@zeus: $tag" "$file"; then
+            tags+=("$tag")
+        fi
+    done
+
+    # Gate 1: Security Siege (HACKER)
+    if [[ "$file" =~ (auth|security|crypto|login|token|secret|key|acl|permissions|policy) ]] || \
+       grep -qiE "(password|secret|jwt|verify|apiKey|credential|OAuth|Bearer|encrypt|decrypt)" "$file"; then
         tags+=("hacker")
     fi
-    if [[ "$file" =~ (arch|schema|model|core|main|index|interface|api|route|controller|service|repository|provider|middleware|hook|context|adapter|factory) ]]; then
+
+    # Gate 2: Structural Integrity (ARCHITECT)
+    if [[ "$file" =~ (arch|schema|model|core|interface|api|controller|service|repository) ]] || \
+       grep -qiE "(interface|abstract class|implements|extends|Singleton|Factory)" "$file"; then
         tags+=("architect")
     fi
 
-    # 2. Content Signatures (Semantic Deep Pass)
-    if [[ -f "$file" ]]; then
-        # Hacker Signatures (Security/Auth)
-        if grep -qiE "(password|secret|jwt|verify|apiKey|credential|OAuth|Bearer|private_key|encrypt|decrypt)" "$file"; then
-            tags+=("hacker")
-        fi
-
-        # QA_PRO Signatures (Testing/Assertion)
-        if grep -qiE "(describe\(|it\(|test\(|expect\(|assert|suite|fixture|spyOn|mock)" "$file"; then
-            tags+=("qa-pro")
-        fi
-
-        # Architect Signatures (Structure/Patterns)
-        if grep -qiE "(interface|abstract class|implements|extends|Singleton|Factory|Provider|Controller|Service|Repository)" "$file"; then
-            tags+=("architect")
-        fi
-
-        # Cleaner Signatures (Maintenance/Tech Debt)
-        if grep -qiE "(TODO|FIXME|HACK|deprecated|unused|@deprecated)" "$file"; then
-            tags+=("cleaner")
-        fi
+    # Gate 3: Verification Depth (QA_PRO)
+    if [[ "$file" =~ (\.test\.|\.spec\.|tests/|coverage/|mock|fixture) ]] || \
+       grep -qiE "(describe\(|it\(|test\(|expect\(|assert|suite)" "$file"; then
+        tags+=("qa-pro")
     fi
 
-    # 3. Fallback: Ensure at least architect if no tags found
-    if [[ ${#tags[@]} -eq 0 ]]; then
-        tags+=("architect")
+    # Gate 4: Somatic Cleanup (CLEANER)
+    if [[ "$file" =~ \.(js|ts|py|go|rs|rb|php|java|c|cpp|cs|swift|kt)$ ]] || \
+       grep -qiE "(TODO|FIXME|HACK|deprecated)" "$file"; then
+        tags+=("cleaner")
     fi
 
-    # Output unique space-separated tags
-    echo "${tags[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs
+    # Fallback to generalist
+    [[ ${#tags[@]} -eq 0 ]] && tags+=("architect")
+
+    echo "${tags[@]}" | tr ' ' '\n' | sort -u | xargs
 }
 
-case "$COMMAND" in
+# ---------------------------------------------------------------------------
+# Main Execution
+# ---------------------------------------------------------------------------
+case "${1:-}" in
     list)
-        if [[ -d "skills" ]]; then
-            if command -v fd >/dev/null 2>&1; then
-                fd . "skills/" --max-depth 1 --type d --exec basename {}
-            elif command -v fdfind >/dev/null 2>&1; then
-                fdfind . "skills/" --max-depth 1 --type d --exec basename {}
-            else
-                ls -F "skills/"
-            fi
-        else
-            echo "Error: skills/ directory not found." >&2
-            exit 1
-        fi
+        list_skills
         ;;
     bootstrap)
-        if [[ -f "$HOME/.config/opencode/bin/init-memory.mjs" ]]; then
-            node "$HOME/.config/opencode/bin/init-memory.mjs"
-        else
-            echo "Error: $HOME/.config/opencode/bin/init-memory.mjs not found." >&2
-            exit 1
-        fi
+        node "$BIN_DIR/init-memory.mjs" --force
         ;;
     audit)
-        FILE="${2:-}"
-        if [[ -z "$FILE" ]]; then
-            echo "Usage: $0 audit <file>" >&2
-            exit 1
-        fi
-        get_audit_tags "$FILE"
+        [[ -z "${2:-}" ]] && { echo "Usage: $0 audit <file>" >&2; exit 1; }
+        get_audit_tags "$2"
         ;;
     *)
         echo "Usage: $0 {list|bootstrap|audit <file>}" >&2

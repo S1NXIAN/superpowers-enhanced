@@ -33,7 +33,7 @@ describe('lib/command-guard', () => {
     it('returns CRITICAL match for rm -rf /', () => {
       const result = checkCommand('rm -rf /');
       assert.equal(result.severity, 'CRITICAL');
-      assert.ok(result.message.includes('rm'));
+      assert.ok(result.pattern.includes('rm'));
     });
 
     it('returns CRITICAL match for git push --force', () => {
