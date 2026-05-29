@@ -248,6 +248,20 @@ function installFiles(fileChanges, dirChanges) {
   }
 }
 
+function ensureMemoryDir() {
+  if (dryRunMode) {
+    con.outInfo('Would create zeus/memory/ directory');
+    return;
+  }
+  const memDir = join(REPO_DIR, 'zeus', 'memory');
+  try {
+    mkdirSync(memDir, { recursive: true });
+    con.outOk('Created zeus/memory/');
+  } catch (err) {
+    con.outWarn(`Could not create zeus/memory/: ${err.message}`);
+  }
+}
+
 function installGitHook() {
   if (dryRunMode) {
     con.outInfo('Would install git post-checkout hook');
@@ -359,6 +373,7 @@ async function main() {
   installConfig(configChanges);
   installFiles(fileChanges, dirChanges);
   installGitHook();
+  ensureMemoryDir();
   const verified = verify();
 
   if (backupDir) con.outInfo(`Backups saved to ${backupDir}`);

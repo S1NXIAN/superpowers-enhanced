@@ -2,9 +2,9 @@
 # ===========================================================================
 # post-checkout-hook.sh — Git post-checkout hook for context snapshots
 #
-# Automatically generates .context-snapshot.json at the project root on every
-# branch switch. Captures git hash, changed files, change stats, recent
-# commits, and blast radius (files referencing changed modules).
+# Automatically generates <project-root>/zeus/memory/context-snapshot.json
+# on every branch switch. Captures git hash, changed files, change stats,
+# recent commits, and blast radius (files referencing changed modules).
 #
 # Degrades gracefully: if Node.js is missing, rg is missing, or anything
 # fails, the hook exits 0 silently — it never blocks a checkout.
@@ -91,6 +91,9 @@ try {
     }
   }
 
+  const memDir = path.join(root, 'zeus', 'memory');
+  fs.mkdirSync(memDir, { recursive: true });
+
   const snapshot = {
     git_hash: gitHash,
     changed_files: changedFiles,
@@ -100,7 +103,7 @@ try {
     generated: new Date().toISOString()
   };
 
-  fs.writeFileSync(path.join(root, '.context-snapshot.json'), JSON.stringify(snapshot, null, 2));
+  fs.writeFileSync(path.join(memDir, 'context-snapshot.json'), JSON.stringify(snapshot, null, 2));
 } catch (_) {
   // Silent failure — never block a checkout
 }
