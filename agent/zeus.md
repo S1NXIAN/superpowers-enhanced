@@ -19,14 +19,14 @@ then run a single staleness check that replaces multi-step reasoning:
 
 ```bash
 mkdir -p zeus/memory
-node bin/staleness-check.mjs   # output: FRESH | SNAPSHOT_STALE | MAP_STALE | MISSING | NO_GIT
+node ~/.config/opencode/bin/staleness-check.mjs
 ```
 
 Based on output:
 - `FRESH` → no action needed
-- `SNAPSHOT_STALE:hash` → run `node lib/context-snapshot.mjs --write` to rebuild snapshot
+- `SNAPSHOT_STALE:hash` → run `node ~/.config/opencode/lib/context-snapshot.mjs --write` to rebuild snapshot
 - `MAP_STALE:hash` → run `git diff --name-only <hash> HEAD` → re-read only changed files
-- `SNAPSHOT_MISSING` → run `node lib/context-snapshot.mjs --write` to create it
+- `SNAPSHOT_MISSING` → run `node ~/.config/opencode/lib/context-snapshot.mjs --write` to create it
 - `MAP_MISSING` → no action (map is generated on demand)
 - `NO_GIT` → skip all memory checks (no git repo)
 
@@ -38,7 +38,7 @@ Then check known issues: If `zeus/memory/known-issues.md` exists:
    - If no file: no action
 
 4. **Command guard** — Before every Bash command, check against dangerous patterns:
-   - Import `lib/command-guard.mjs` patterns
+   - Import `~/.config/opencode/lib/command-guard.mjs` patterns
    - If command matches CRITICAL pattern → require `DANGEROUS_CMD_ACCEPTED=true` prefix
    - If command matches DANGEROUS pattern → log warning before executing
    - Never suppress these checks for "convenience"
@@ -46,7 +46,7 @@ Then check known issues: If `zeus/memory/known-issues.md` exists:
 ## Complexity Classification (run first, output decision)
 
 1. **User annotation** → `@quick` → **Fast Path** (skip all further checks). `@full` → **Full Path**.
-2. **Security triage** → run `node bin/security-scan.mjs <files>` for automated T1/T2/T3 pattern matching. If any match found → **Full Path** (annotate with trigger), halt classification. Then invoke `security-triage` skill for the T4 semantic audit.
+2. **Security triage** → run `node ~/.config/opencode/bin/security-scan.mjs <files>` for automated T1/T2/T3 pattern matching. If any match found → **Full Path** (annotate with trigger), halt classification. Then invoke `security-triage` skill for the T4 semantic audit.
 3. **Heuristics** → if none of the above:
    - Files touched ≤ 2 AND task keywords in {fix, typo, rename, update, bump, refactor} AND single concern → **Fast Path**
    - Otherwise → **Full Path**
@@ -60,7 +60,7 @@ Output your decision exactly as:
 2. **TDD** (load TDD skill, execute RED→GREEN→REFACTOR).
 3. **Self-consistency verification** — 2-3 independent checks (run tests, review diff, edge cases) before claiming success.
 4. **Report** — output the changes and verification results.
-5. **Cleanup** — run `node bin/cleanup.mjs` to remove AI-generated temp files (design docs, plans, state files).
+5. **Cleanup** — run `node ~/.config/opencode/bin/cleanup.mjs` to remove AI-generated temp files (design docs, plans, state files).
 
 No brainstorming, plans, sub-agents, deliberation, ASI loop, or reviews on fast path.
 
@@ -96,7 +96,7 @@ After all tasks: run full test suite, check for side effects, and generate 2-3 i
 After passing all reviews, present final summary with verification evidence. Do not merge without explicit user approval.
 
 ### 8. Cleanup
-Run `node bin/cleanup.mjs` to remove AI-generated temp files created during the task: design docs and specs, implementation plans, ASI loop state, and agent artifacts.
+Run `node ~/.config/opencode/bin/cleanup.mjs` to remove AI-generated temp files created during the task: design docs and specs, implementation plans, ASI loop state, and agent artifacts.
 
 ## Model Strategy
 - Full path planning, architecture, reviews → full reasoning.
@@ -107,4 +107,4 @@ Run `node bin/cleanup.mjs` to remove AI-generated temp files created during the 
 - **Evidence over claims** — run tests, read output, then assert.
 - **Security triage is hard-coded** — pattern matching, never skipped.
 - **Adapt process to complexity** — no unnecessary ceremony.
-- **Pre-execution safety** — screen every Bash command against `lib/command-guard.mjs` patterns before execution. CRITICAL patterns require `DANGEROUS_CMD_ACCEPTED=true` override prefix. This is non-negotiable.
+- **Pre-execution safety** — screen every Bash command against `~/.config/opencode/lib/command-guard.mjs` patterns before execution. CRITICAL patterns require `DANGEROUS_CMD_ACCEPTED=true` override prefix. This is non-negotiable.
