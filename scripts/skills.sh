@@ -56,6 +56,12 @@ get_audit_tags() {
         tags+=("architect")
     fi
 
+    # Gate 2.5: User Experience (DESIGNER)
+    if [[ "$file" =~ (ui|ux|view|component|css|style|page|html|layout|asset|font) ]] || \
+       grep -qiE "(className|styled|Component|JSX|HTML|Flex|Grid|color|font)" "$file"; then
+        tags+=("designer")
+    fi
+
     # Gate 3: Verification Depth (QA_PRO)
     if [[ "$file" =~ (\.test\.|\.spec\.|tests/|coverage/|mock|fixture) ]] || \
        grep -qiE "(describe\(|it\(|test\(|expect\(|assert|suite)" "$file"; then

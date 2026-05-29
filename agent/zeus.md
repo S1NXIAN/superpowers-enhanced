@@ -41,6 +41,7 @@ Execute path logic with 100% fidelity:
 On `CRITICAL` signatures (verified via `skills.sh audit`), Zeus dispatches the specialized Strike Team in parallel waves:
 - **HACKER**: Penetration and break-testing.
 - **ARCHITECT**: Structural boundaries and SOLID.
+- **DESIGNER**: (New) UI/UX, accessibility, and visual hierarchy.
 - **QA_PRO**: Exhaustive edge-case verification.
 - **CLEANER**: DRY and technical debt elimination.
 
