@@ -6,36 +6,70 @@ set -euo pipefail
 
 readonly COMMAND="${1:-}"
 
-# Function to determine audit tag based on filename
-get_audit_tag() {
+# Function to determine audit tags based on filename and content signatures
+get_audit_tags() {
     local -r file="$1"
+    local tags=()
     
-    # QA/Testing
-    if [[ "$file" =~ (\.test\.|\.spec\.|tests/) ]]; then
-        echo "qa-pro"
-        return
+    # 0. Check for Manual Overrides (@zeus: [tag] or @zeus: strike-team)
+    if [[ -f "$file" ]]; then
+        if grep -qi "@zeus: strike-team" "$file"; then
+            echo "architect cleaner hacker qa-pro"
+            return
+        fi
+        
+        # Specific tag overrides
+        for tag in "architect" "cleaner" "hacker" "qa-pro"; do
+            if grep -qi "@zeus: $tag" "$file"; then
+                tags+=("$tag")
+            fi
+        done
     fi
 
-    # Security sensitive
-    if [[ "$file" =~ (auth|security|crypto) ]]; then
-        echo "hacker"
-        return
+    # 1. Filename Heuristics (Quick Pass)
+    if [[ "$file" =~ \.(js|ts|py|go|rs|rb|php|java|c|cpp|cs|swift|kt)$ ]]; then
+        tags+=("cleaner")
+    fi
+    if [[ "$file" =~ (\.test\.|\.spec\.|tests/|coverage/|mock|fixture|stub) ]]; then
+        tags+=("qa-pro")
+    fi
+    if [[ "$file" =~ (auth|security|crypto|login|token|permissions|acl|encrypt|decrypt|hash|cors|policy|secret) ]]; then
+        tags+=("hacker")
+    fi
+    if [[ "$file" =~ (arch|schema|model|core|main|index|interface|api|route|controller|service|repository|provider|middleware|hook|context|adapter|factory) ]]; then
+        tags+=("architect")
     fi
 
-    # Maintenance/Utils
-    if [[ "$file" =~ (refactor|clean|util) ]]; then
-        echo "cleaner"
-        return
+    # 2. Content Signatures (Semantic Deep Pass)
+    if [[ -f "$file" ]]; then
+        # Hacker Signatures (Security/Auth)
+        if grep -qiE "(password|secret|jwt|verify|apiKey|credential|OAuth|Bearer|private_key|encrypt|decrypt)" "$file"; then
+            tags+=("hacker")
+        fi
+
+        # QA_PRO Signatures (Testing/Assertion)
+        if grep -qiE "(describe\(|it\(|test\(|expect\(|assert|suite|fixture|spyOn|mock)" "$file"; then
+            tags+=("qa-pro")
+        fi
+
+        # Architect Signatures (Structure/Patterns)
+        if grep -qiE "(interface|abstract class|implements|extends|Singleton|Factory|Provider|Controller|Service|Repository)" "$file"; then
+            tags+=("architect")
+        fi
+
+        # Cleaner Signatures (Maintenance/Tech Debt)
+        if grep -qiE "(TODO|FIXME|HACK|deprecated|unused|@deprecated)" "$file"; then
+            tags+=("cleaner")
+        fi
     fi
 
-    # Architecture/Structure
-    if [[ "$file" =~ (arch|schema|model) ]]; then
-        echo "architect"
-        return
+    # 3. Fallback: Ensure at least architect if no tags found
+    if [[ ${#tags[@]} -eq 0 ]]; then
+        tags+=("architect")
     fi
 
-    # Default
-    echo "architect"
+    # Output unique space-separated tags
+    echo "${tags[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs
 }
 
 case "$COMMAND" in
@@ -48,10 +82,10 @@ case "$COMMAND" in
         fi
         ;;
     bootstrap)
-        if [[ -f "bin/init-memory.mjs" ]]; then
-            node "bin/init-memory.mjs"
+        if [[ -f "$HOME/.config/opencode/bin/init-memory.mjs" ]]; then
+            node "$HOME/.config/opencode/bin/init-memory.mjs"
         else
-            echo "Error: bin/init-memory.mjs not found." >&2
+            echo "Error: $HOME/.config/opencode/bin/init-memory.mjs not found." >&2
             exit 1
         fi
         ;;
@@ -61,7 +95,7 @@ case "$COMMAND" in
             echo "Usage: $0 audit <file>" >&2
             exit 1
         fi
-        get_audit_tag "$FILE"
+        get_audit_tags "$FILE"
         ;;
     *)
         echo "Usage: $0 {list|bootstrap|audit <file>}" >&2

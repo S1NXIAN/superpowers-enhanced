@@ -1,13 +1,51 @@
 ---
 name: subagent-driven-development
-description: >
-  Executes plans using parallel subagents with per-task implementation
-  and staged review gates. Invoke for parallel plan execution in the
-  current session. Routed by writing-plans handoff or using-superpowers
-  for large plans with independent tasks.
+description: High-performance execution engine. Fresh sub-agents per task, two-stage review gates, and parallel wave dispatch.
 ---
 
-# Subagent-Driven Development
+# Subagent-Driven Development (SDD)
+
+Orchestrate specialists. Isolate context. Scale execution.
+
+## Iron Laws
+- **Fresh Sub-agent Per Task**: Zero context leakage between implementation units.
+- **Two-Stage Review Mandatory**: Spec Compliance FIRST, Code Quality SECOND.
+- **Parallel Waves Default**: If tasks are disjoint, dispatch simultaneously in one turn.
+- **No Skill Leakage**: Sub-agents MUST NOT invoke skills. Only task execution.
+
+## The Operational Flow
+
+1.  **Read & Extract**: Parse the `plan.md` into atomic tasks.
+2.  **Parallel Wave Grouping**: 
+    - Group tasks by file-disjointness.
+    - Dispatch a "Wave" of 3-5 sub-agents in a **single tool-call response**.
+3.  **Review Gates**:
+    - **Stage 1 (Spec)**: `spec-reviewer` confirms implementation matches plan.
+    - **Stage 2 (Quality)**: `code-quality` checks structural debt and standards.
+    - *Loop:* If fails, return to implementer immediately.
+4.  **Integration**: Run full suite after wave completion.
+5.  **Finalize**: Invoke `finishing-a-development-branch`.
+
+## E2E Hygiene (Standard)
+Before starting any service, sub-agents must:
+1. `pkill` existing instances.
+2. Verify port is free (`lsof -i`).
+After finish:
+1. Stop the service.
+2. Verify cleanup (`pgrep`).
+
+## Status Handling
+- **DONE**: Proceed to Spec Review.
+- **DONE_WITH_CONCERNS**: Audit concerns before review.
+- **BLOCKED**: Re-dispatch with higher model (Opus) or escalate to Zeus Core.
+
+## Rationalization Table
+
+| Temptation | Danger |
+| :--- | :--- |
+| "I'll implement Task 1 and 2 together" | Context pollution. Logic bleed. |
+| "Skip Spec Review, I trust this model" | Trust is not a quality gate. Evidence is. |
+| "Dispatch one agent at a time" | Wastes 80% of wall-clock time and doubles token costs. |
 
 Execute a plan with fresh subagents per task and strict review gates.
 

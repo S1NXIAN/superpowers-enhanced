@@ -1,67 +1,45 @@
 ---
 name: error-recovery
-description: >
-  Maintains a project-specific known-issues.md mapping recurring errors
-  to their solutions. Consulted automatically by systematic-debugging
-  before investigation. Saves time by avoiding rediscovery of known
-  problems across sessions. Triggers on: "save this fix", "remember
-  this error", "known issues", or automatically when systematic-debugging
-  resolves a recurring error.
+description: Maintains a project-level error→solution mapping to eliminate re-investigation costs for known platform/env issues.
 ---
 
-# Error Recovery Intelligence
+# Error Recovery
 
-Maintain a project-level error→solution mapping to avoid rediscovering known problems.
+Project-level memory for ghosts in the machine.
 
-## File Location
+## Operational Rule
+**Consult FIRST, Fix SECOND.** Before any debugging turn, Zeus MUST check for existing leads in `known-issues.md`.
 
-`known-issues.md` at the project root (same level as `package.json`, `Cargo.toml`, etc.).
+## The Database: `known-issues.md`
+- **Location:** Project root.
+- **Scope:** Env errors, port conflicts, version skew, platform quirks (Mac vs Linux), flaky tests due to state, complex investigated bugs.
+- **Hard Exclusions:** One-off logic bugs, README info, transient API failures.
 
-## When to Consult
+## Verification Cycle
+1.  **Phase 0 (Consult):** Search `known-issues.md` for error substrings.
+2.  **Phase 1 (Apply):** If a match is found, try the documented **Fix** immediately.
+3.  **Phase 2 (Capture):** If a new complex bug is solved, offer to record it in the registry using the canonical format.
 
-Before starting any debugging investigation:
-1. Check if `known-issues.md` exists.
-2. Search it for the error message, error code, or failing test name.
-3. If a match is found, try the documented solution first before full investigation.
-
-## When to Update
-
-After resolving a bug that is likely to recur:
-- Environment-dependent errors (missing services, port conflicts, env vars)
-- Configuration errors (wrong versions, missing dependencies, build flags)
-- Test failures caused by external state (database needs seeding, service needs starting)
-- Platform-specific issues (Windows vs. Unix path handling, line endings)
-- Errors that took significant investigation to diagnose
-
-**Do NOT record:**
-- One-off logic bugs (the fix is in the code; the commit message has the context)
-- Errors already documented in the project's README or docs
-- Transient network/API failures
-
-## Entry Format
-
-Each entry must be concise and actionable:
-
+## Entry Schema (Concise)
 ```markdown
-## [Short description]
-
-**Error:** `exact error message or pattern`
-**Cause:** One sentence explaining why this happens.
-**Fix:**
+## [Title]
+**Error:** `Exact pattern`
+**Root Cause:** One-sentence technical explanation.
+**Fix:** 
 ```bash
-exact command or steps to resolve
+[Exact command]
 ```
-**Context:** When this typically occurs (e.g., "after fresh clone", "on Windows", "when DB is not running").
+**Context:** When it fires (e.g., "Windows only", "After npm install").
 ```
 
-## File Management
+## Maintenance Gates
+- Max 50 entries. Prune stale ghosts.
+- If a root cause is deleted from the codebase, the entry MUST be removed.
 
-- Keep `known-issues.md` under 50 entries. If it grows beyond that, prune entries that haven't been relevant in months.
-- Group entries by category (Environment, Dependencies, Tests, Build, Platform).
-- When a known issue is permanently fixed (e.g., the root cause was removed from the codebase), delete the entry.
+## Rationalization Table
 
-## Integration
-
-- `systematic-debugging` consults this file in Phase 1 (Investigate) before generating hypotheses.
-- `using-superpowers` reads this file during the entry sequence when it exists.
-- After resolving a debugging session, offer to add the error→solution mapping if it meets the "When to Update" criteria.
+| Temptation | Danger |
+| :--- | :--- |
+| "I'll just re-investigate to be sure" | Wastes 15 min of token/time cost. |
+| "This bug is too small to record" | Small environment bugs recur most often. |
+| "I'll record every bug" | Information noise. Stick to complex/platform issues. |

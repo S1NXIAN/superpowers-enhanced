@@ -1,19 +1,46 @@
 ---
 name: dependency-management
-description: >
-  MUST USE when updating, migrating, or auditing project dependencies: upgrading
-  packages, fixing security vulnerabilities (CVEs), resolving breaking changes,
-  migrating to new major versions, or auditing outdated dependencies. Enforces
-  incremental updates with verification at each step. Distinct from systematic-debugging
-  (which fixes application bugs) and refactoring (which restructures application code).
-  Triggers on: "update dependencies", "upgrade packages", "npm update", "pip upgrade",
-  "outdated", "vulnerability", "CVE", "security advisory", "breaking change",
-  "migration guide", "dependency conflict", "peer dependency",
-  "update to latest", "audit dependencies", "npm audit", "dependabot".
-  Routed by using-superpowers, or invoke directly via /dependency-management.
+description: Strict protocol for one-at-a-time dependency updates. Prevents "Dependency Hell" via incremental verification.
 ---
 
 # Dependency Management
+
+Update once. Verify twice. Move on.
+
+## The Iron Rule
+**NEVER batch major upgrades.** One package per commit. One verification cycle per change.
+
+## The Operational Workflow
+
+1.  **Phase 1 (Audit):**
+    - List outdated deps (`npm outdated`, `pip list --outdated`, etc.).
+    - Categorize: **Security** > **Breaking** > **Feature**.
+2.  **Phase 2 (Assessment):**
+    - Read the changelog.
+    - Grep the codebase for usage of changed APIs.
+    - Identify peer dependency risks.
+3.  **Phase 3 (Incremental Update):**
+    - Update exactly ONE package.
+    - Commit lockfile change separately from code changes.
+    - **Verify:** Full test suite + build success.
+4.  **Phase 4 (Smoke Test):**
+    - Run the application. Hit the affected codepath.
+
+## Handling Vulnerabilities (CVE)
+- Assess exploitability: Is the vulnerable function actually called?
+- If patch available: Priority 1 Update.
+- If no patch: Document in `known-issues.md` with a re-check date.
+
+## Lockfile Conflicts
+- **Resolution:** Accept target branch version &rarr; Re-run `install` &rarr; Verify. Never hand-edit a lockfile.
+
+## Rationalization Table
+
+| Temptation | Danger |
+| :--- | :--- |
+| "I'll just update all 5 minor deps" | If the build breaks, you lose 20 min finding the culprit. |
+| "It's just a version bump, no code change" | Silent API shifts or transitive peer conflicts can still kill the runtime. |
+| "Delete lockfile to start fresh" | Destroys the deterministic nature of the project. |
 
 Update one thing at a time. Verify after each. Never batch major upgrades.
 
