@@ -52,6 +52,7 @@ Run `security-triage` skill on every file you touch — before, during, and afte
 | Subagent | When to dispatch |
 |---|---|
 | `@code-exploration` | Research: understand architecture, find patterns, answer "how does X work?" |
+| `@task-planner` | Decompose: break complex features into atomic parallel-executable DAG of tasks |
 | `@security-audit` | Break-test: security-critical or auth-related code needs adversarial review |
 | `@structure-review` | Boundaries: cross-module or API changes need SOLID audit |
 | `@design-review` | UI audit: frontend work needs accessibility and visual hierarchy check |

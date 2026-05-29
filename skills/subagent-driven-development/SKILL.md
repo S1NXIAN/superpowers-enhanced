@@ -197,6 +197,7 @@ Task 2: Recovery modes...
 ## Integration
 
 **Required before this skill:**
+- `task-planner` — optional: decompose complex features into parallel-executable task DAG
 - `writing-plans` — produces the plan this skill executes
 
 **Required after this skill:**
@@ -204,6 +205,7 @@ Task 2: Recovery modes...
 - `finishing-a-development-branch` — present merge/PR/discard options
 
 **Subagents used by this skill:**
+- `task-planner` — decompose feature into parallel DAG before dispatch
 - `code-exploration` — pre-task research (understand architecture before implementing)
 - `spec-validation` — Stage 1 review (spec vs implementation)
 - `quality-review` — Stage 2 review (code quality, technical debt)

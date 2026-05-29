@@ -41,6 +41,7 @@ describe('Zeus Elite Architecture', () => {
         assert.ok(zeusContent.includes('@security-audit'));
         assert.ok(zeusContent.includes('@structure-review'));
         assert.ok(zeusContent.includes('@code-exploration'));
+        assert.ok(zeusContent.includes('@task-planner'));
         assert.ok(zeusContent.includes('@root-cause-analysis'));
         assert.ok(zeusContent.includes('@verification'));
         assert.ok(zeusContent.includes('@code-cleanup'));

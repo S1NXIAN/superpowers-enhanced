@@ -11,6 +11,8 @@ Write comprehensive implementation plans that assume the executing engineer has 
 
 **Core principle:** A plan is only as good as its weakest step. Every step must contain the ACTUAL content an engineer needs — not instructions to write it later.
 
+**For complex multi-file features:** Dispatch `@task-planner` first to decompose into an independent-task DAG. Then use this skill to flesh out each task into precise implementation steps.
+
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
 ## Scope Check
