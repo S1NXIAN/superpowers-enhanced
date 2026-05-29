@@ -14,20 +14,21 @@
  *   node bin/cleanup.mjs --help   — show this
  */
 
-import { existsSync, rmSync, readdirSync } from 'node:fs';
+import { existsSync, rmSync, readdirSync, lstatSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createConsole } from '../lib/console.mjs';
 
 const REPO_DIR = process.cwd();
-const con = createConsole(process.stdout.isTTY);
+const con = createConsole();
 const { c, BOLD, DIM, RED } = con;
 
 let dryRunMode = false;
 
 // All artifact paths — now all untracked/ignored, safe to delete without prompting
 const ARTIFACTS = [
-  { rel: 'zeus/docs',            type: 'dir',  label: 'design docs and plans' },
+  { rel: 'docs/plans',           type: 'dir',  label: 'implementation plans' },
+  { rel: 'docs/zeus',            type: 'dir',  label: 'design docs and specs' },
   { rel: '.asi-state.json',      type: 'file', label: 'ASI loop state' },
   { rel: '.antigravitycli',      type: 'dir',  label: 'agent artifacts' },
   { rel: '.agents',              type: 'dir',  label: 'agent files' },

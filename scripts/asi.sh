@@ -41,7 +41,10 @@ read_state() {
     return
   fi
   node -e "
-    const f = require('fs').readFileSync('$STATE_FILE','utf8');
+    const fs = require('fs');
+    const stateFile = process.argv[1];
+    if (!fs.existsSync(stateFile)) { console.log('{\"cycle\":0,\"maxCycles\":4,\"lastUpdated\":\"\",\"issues\":[]}'); process.exit(0); }
+    const f = fs.readFileSync(stateFile,'utf8');
     let s; try { s = JSON.parse(f); } catch(e) { process.exit(2); }
     const required = ['cycle','maxCycles','lastUpdated','issues'];
     for (const k of required) { if (!(k in s)) process.exit(2); }
@@ -51,15 +54,15 @@ read_state() {
       for (const k of r) { if (!(k in iss)) process.exit(2); }
     }
     console.log(JSON.stringify(s));
-  " 2>/dev/null || echo '{"cycle":0,"maxCycles":4,"lastUpdated":"","issues":[]}'
+  " "$STATE_FILE" 2>/dev/null || echo '{"cycle":0,"maxCycles":4,"lastUpdated":"","issues":[]}'
 }
 
 # ---------------------------------------------------------------------------
-# Write state
+# Write state (Safe large-buffer writing)
 # ---------------------------------------------------------------------------
 write_state() {
   local json="$1"
-  echo "$json" > "$STATE_FILE"
+  node -e "require('fs').writeFileSync(process.argv[1], process.argv[2], 'utf8')" "$STATE_FILE" "$json"
 }
 
 # ---------------------------------------------------------------------------

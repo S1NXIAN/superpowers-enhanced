@@ -6,13 +6,17 @@ set -euo pipefail
 PID_FILE="/tmp/zeus-vision.pid"
 PORT=3000
 
+# Force absolute pathing for the digital anatomy
+BIN_DIR="${HOME}/.config/opencode/bin"
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
 start() {
     if [[ -f "$PID_FILE" ]]; then
         echo "Zeus Vision is already running (PID: $(cat "$PID_FILE"))"
         return
     fi
-    mkdir -p docs/zeus/previews
-    node bin/visual-server.mjs > /dev/null 2>&1 &
+    mkdir -p "$PROJECT_ROOT/docs/zeus/previews"
+    node "$BIN_DIR/visual-server.mjs" > /dev/null 2>&1 &
     echo $! > "$PID_FILE"
     echo "Zeus Vision started on port $PORT"
 }

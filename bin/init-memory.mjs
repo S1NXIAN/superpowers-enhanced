@@ -14,9 +14,12 @@ import { join, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateMap } from '../lib/project-map.mjs';
 import { buildSnapshot } from '../lib/context-snapshot.mjs';
+import { createConsole } from '../lib/console.mjs';
 
 const PROJECT_ROOT = process.cwd();
 const MEMORY_DIR = join(PROJECT_ROOT, 'zeus', 'memory');
+const con = createConsole();
+const { c, BOLD, DIM, RED, GREEN, YELLOW } = con;
 
 const HELP_TEXT = `init-memory — bootstrap AI memory directory for this project
 
@@ -30,93 +33,12 @@ Usage:
   node bin/init-memory.mjs --help        show this message
 `;
 
-function parseArgs() {
-  const args = process.argv.slice(2);
-  const opts = { help: false, dryRun: false, force: false };
-  for (const arg of args) {
-    if (arg === '--help') opts.help = true;
-    else if (arg === '--dry-run') opts.dryRun = true;
-    else if (arg === '--force') opts.force = true;
-  }
-  return opts;
-}
-
 function wrote(label) {
-  console.log(`  ${'created'} ${label}`);
+  con.outOk(`created ${label}`);
 }
 
 function skipped(label) {
-  console.log(`  ${'skipped'} ${label} (exists, use --force to overwrite)`);
-}
-
-function createMemoryDir(dryRun) {
-  if (dryRun) return;
-  mkdirSync(MEMORY_DIR, { recursive: true });
-}
-
-function writeProjectMap(dryRun, force) {
-  const path = join(MEMORY_DIR, 'project-map.md');
-  if (existsSync(path) && !force) {
-    skipped('project-map.md');
-    return;
-  }
-  if (dryRun) return;
-  const content = generateMap(PROJECT_ROOT);
-  writeFileSync(path, content, 'utf8');
-  wrote('project-map.md');
-}
-
-function writeKnownIssues(dryRun, force) {
-  const path = join(MEMORY_DIR, 'known-issues.md');
-  if (existsSync(path) && !force) {
-    skipped('known-issues.md');
-    return;
-  }
-  if (dryRun) return;
-  const template = `# Known Issues
-
-<!--
-Record recurring errors here so AI remembers them across sessions.
-
-Format:
-## Error title
-
-**Error:** exact error message
-**Root cause:** why it happens
-**Fix:** what fixed it
-**Context:** when does this trigger
-**First seen:** YYYY-MM-DD
--->
-
-`;
-  writeFileSync(path, template, 'utf8');
-  wrote('known-issues.md');
-}
-
-function writeContextSnapshot(dryRun, force) {
-  const path = join(MEMORY_DIR, 'context-snapshot.json');
-  if (existsSync(path) && !force) {
-    skipped('context-snapshot.json');
-    return;
-  }
-  if (dryRun) return;
-  const snapshot = buildSnapshot(PROJECT_ROOT);
-  if (snapshot) {
-    writeFileSync(path, JSON.stringify(snapshot, null, 2) + '\n', 'utf8');
-    wrote('context-snapshot.json');
-  } else {
-    // Non-git project — write minimal stub
-    const stub = {
-      git_hash: 'no-git',
-      changed_files: [],
-      change_stat: '',
-      recent_commits: [],
-      blast_radius: {},
-      generated: new Date().toISOString(),
-    };
-    writeFileSync(path, JSON.stringify(stub, null, 2) + '\n', 'utf8');
-    console.log('  warning  context-snapshot.json (no git repo — minimal stub)');
-  }
+  con.outInfo(`skipped ${label} (exists, use --force to overwrite)`);
 }
 
 function main() {
@@ -127,15 +49,20 @@ function main() {
     process.exit(0);
   }
 
-  console.log(`\n  Initializing zeus/memory/ for ${PROJECT_ROOT}\n`);
+  con.outHeader(`Initializing zeus/memory/ for ${PROJECT_ROOT}`);
 
-  createMemoryDir(opts.dryRun);
-  writeProjectMap(opts.dryRun, opts.force);
-  writeKnownIssues(opts.dryRun, opts.force);
-  writeContextSnapshot(opts.dryRun, opts.force);
+  try {
+    createMemoryDir(opts.dryRun);
+    writeProjectMap(opts.dryRun, opts.force);
+    writeKnownIssues(opts.dryRun, opts.force);
+    writeContextSnapshot(opts.dryRun, opts.force);
+  } catch (err) {
+    con.outError(`Somatic failure during init: ${err.message}`);
+    process.exit(1);
+  }
 
   if (opts.dryRun) {
-    console.log('\n  (dry run — no files written)');
+    console.log(`\n  ${c(DIM, '(dry run — no files written)')}`);
   }
 
   console.log('');
