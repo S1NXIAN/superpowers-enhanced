@@ -30,13 +30,13 @@ describe('Zeus 2.0 Elite Modular Architecture', () => {
       it('Handoffs to full-path skill', () => assert.ok(zeusContent.includes('skill("zeus/full-path")')));
     });
 
-    describe('Elite Features', () => {
-      it('Has Strike Team section', () => assert.ok(zeusContent.includes('The Strike Team')));
-      it('References specialized agents (HACKER, ARCHITECT, etc.)', () => {
-        assert.ok(zeusContent.includes('HACKER'));
-        assert.ok(zeusContent.includes('ARCHITECT'));
-        assert.ok(zeusContent.includes('QA_PRO'));
-        assert.ok(zeusContent.includes('CLEANER'));
+    describe('Strike Team Dispatch', () => {
+      it('Has Strike Team section', () => assert.ok(zeusContent.includes('Strike Team Dispatch')));
+      it('References subagents (hacker, architect, designer, etc.)', () => {
+        assert.ok(zeusContent.includes('@hacker'));
+        assert.ok(zeusContent.includes('@architect'));
+        assert.ok(zeusContent.includes('@qa-pro'));
+        assert.ok(zeusContent.includes('@cleaner'));
       });
       it('Uses token-efficiency at session start', () => assert.ok(zeusContent.includes('Invoke `token-efficiency` at session start')));
     });

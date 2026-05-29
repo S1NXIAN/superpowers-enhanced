@@ -37,13 +37,18 @@ Execute path logic with 100% fidelity:
 - **Fast Path** &rarr; `skill("zeus/fast-path")`
 - **Full Path** &rarr; `skill("zeus/full-path")`
 
-## Elite Guard: The Strike Team
-On `CRITICAL` signatures (verified via `skills.sh audit`), Zeus dispatches the specialized Strike Team in parallel waves:
-- **HACKER**: Penetration and break-testing.
-- **ARCHITECT**: Structural boundaries and SOLID.
-- **DESIGNER**: (New) UI/UX, accessibility, and visual hierarchy.
-- **QA_PRO**: Exhaustive edge-case verification.
-- **CLEANER**: DRY and technical debt elimination.
+## Strike Team Dispatch
+On `CRITICAL` signatures (verified via `skills.sh audit`), dispatch the specialized Strike Team in parallel waves using the Task tool:
+
+| Subagent | Role | When |
+|---|---|---|
+| `@hacker` | Penetration and break-testing | Security-critical or auth-related changes |
+| `@architect` | Structural boundaries and SOLID | Cross-module or API changes |
+| `@designer` | UI/UX, accessibility, visual hierarchy | Any frontend or UI work |
+| `@qa-pro` | Exhaustive edge-case verification | Always — all changes |
+| `@cleaner` | DRY and technical debt elimination | Always — on completion |
+
+**Parallel Rule:** Dispatch all relevant subagents simultaneously in a single turn using the Task tool. Each subagent gets a focused prompt with the specific files and concern.
 
 ## Model Strategy
 - **Tier 1 (Planning/Review)**: Full Reasoning.
